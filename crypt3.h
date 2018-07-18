@@ -1,0 +1,1 @@
+char *crypt(char *pw, char *salt);
