@@ -8,7 +8,8 @@
 typedef enum { 
   APP_MODE_HELP, 
   APP_MODE_CRYPT,
-  APP_MODE_DECRYPT
+  APP_MODE_DECRYPT,
+  APP_MODE_BENCHMARK
 } app_mode_t;
 
 typedef char password_t[MAX_LEN + 1];

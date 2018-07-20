@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
 
-#include "config.h"
-#include "check.h"
-#include "crypt3.h"
 #include "bruteforce.h"
+#include "check.h"
+#include "config.h"
+#include "crypt3.h"
 
 void help_routine() {
   printf("Available parameters:\n");
@@ -18,19 +19,41 @@ void encrypt_routine(config_t *config) {
   printf("%s", encrypted);
 }
 
-void decrypt_routine(config_t *config){
+void decrypt_routine(config_t *config) {
   task_t initial_task = {
-    .from = 0,
+    .from = 0, 
     .to = config->length
   };
 
   bruteforce_rec(&initial_task, config, check_task);
 
-  if (config->result.found == true){
+  if (config->result.found == true) {
     printf("Result found: %s\n", config->result.password);
   } else {
     printf("Result not found\n");
   }
+}
+
+void benchmark_routine(config_t *config) {
+  task_t initial_task = {.from = 0, .to = config->length};
+
+  struct timeval start;
+  struct timeval end;
+
+  gettimeofday(&start, NULL);
+
+  bruteforce_rec(&initial_task, config, check_task_benchmark);
+
+  gettimeofday(&end, NULL);
+
+  int alphabet_len = strlen(config->alphabet);
+  long long cnt = 1;
+  for (int i = 0; i < config->length; i++){
+    cnt *= alphabet_len;
+  }
+
+  float elapsed = (end.tv_sec - start.tv_sec) * 1000.0f + (end.tv_usec - start.tv_usec) / 1000.0f;
+  printf("Bruteforced %ld items. Time elapsed: %.4f\n", cnt, elapsed);
 }
 
 int parse_args(int argc, char *argv[], config_t *config) {
@@ -74,6 +97,11 @@ int parse_args(int argc, char *argv[], config_t *config) {
     return EXIT_SUCCESS;
   }
 
+  if (strcmp("benchmark", mode) == 0){
+    config->app_mode = APP_MODE_BENCHMARK;
+    return EXIT_SUCCESS;
+  }
+
   fprintf(stderr, "Command not recognized: %s\n", mode);
 
   return EXIT_FAILURE;
@@ -99,6 +127,10 @@ int main(int argc, char *argv[]) {
 
       case APP_MODE_DECRYPT:
         decrypt_routine(&config);
+        break;
+
+      case APP_MODE_BENCHMARK:
+        benchmark_routine(&config);
         break;
 
       default:
