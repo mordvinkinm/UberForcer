@@ -3,8 +3,16 @@
 
 #include "common.h"
 
+typedef enum { 
+  APP_MODE_HELP, 
+  APP_MODE_CRYPT 
+} app_mode_t;
+
 typedef struct config_s {
-    bool debug_mode;
+  app_mode_t app_mode;
+
+  char* value;
+  char* salt;
 } config_t;
 
 #endif /* CONFIG_H */
