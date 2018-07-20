@@ -1,6 +1,8 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <stdio.h>
+
 #define bool short int
 #define true 1
 #define false 0
