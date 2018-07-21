@@ -25,8 +25,17 @@ typedef struct task_s {
   int to;
 } task_t;
 
+typedef enum {
+  BF_ITER,
+  BF_REC,
+} bf_mode_t;
+
 typedef struct config_s {
+  void (*brute_function) (task_t *, struct config_s *, void (*check_handler) (struct config_s * config, char * pass));
+
   app_mode_t app_mode;
+  bf_mode_t bruteforce_mode;
+
   result_t result;
 
   char* alphabet;

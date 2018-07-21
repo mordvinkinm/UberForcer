@@ -5,4 +5,6 @@
 
 void bruteforce_rec(task_t* task, config_t* config, void (*check_handler)(config_t* config, char* pass));
 
+void bruteforce_iter(task_t* task, config_t* config, void (*check_handler)(config_t* config, char* pass));
+
 #endif /* BRUTEFORCE_H */

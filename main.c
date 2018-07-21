@@ -9,25 +9,34 @@
 #include "crypt3.h"
 
 void help_routine() {
-  printf("Available parameters:\n");
+  printf("Available commands:\n\n");
   printf("uberforcer help\t\t\t\t\tshow help file\n");
   printf("uberforcer crypt <password> <salt>\t\tcall crypt function\n");
+  printf("uberforcer decrypt <hash> <args>\t\tcall decrypt function\n");
+  printf("uberforcer benchmark <args>\t\t\tperform benchmarking\n");
+  printf("\n");
+  printf("Available arguments:\n");
+  printf("-r or -i\t\ta bruteforcer algorithm - iterative or recursive");
 }
 
 void encrypt_routine(config_t *config) {
+  debug("Started encryption with: password=%s, salt=%s\n", config->value, config->salt);
+
   char *encrypted = crypt(config->value, config->salt);
   printf("%s", encrypted);
 }
 
 void decrypt_routine(config_t *config) {
+  debug("Started decryption in %s mode\n", config->bruteforce_mode == BF_ITER ? "iterative" : "recursive");
+
   task_t initial_task = {
     .from = 0, 
     .to = config->length
   };
 
-  bruteforce_rec(&initial_task, config, check_task);
+  config->brute_function(&initial_task, config, check_task);
 
-  if (config->result.found == true) {
+  if (config->result.found != false) {
     printf("Result found: %s\n", config->result.password);
   } else {
     printf("Result not found\n");
@@ -35,6 +44,8 @@ void decrypt_routine(config_t *config) {
 }
 
 void benchmark_routine(config_t *config) {
+  debug("Started benchmark in %s mode\n", config->bruteforce_mode == BF_ITER ? "iterative" : "recursive");
+
   task_t initial_task = {.from = 0, .to = config->length};
 
   struct timeval start;
@@ -42,7 +53,7 @@ void benchmark_routine(config_t *config) {
 
   gettimeofday(&start, NULL);
 
-  bruteforce_rec(&initial_task, config, check_task_benchmark);
+  config->brute_function(&initial_task, config, check_task_benchmark);
 
   gettimeofday(&end, NULL);
 
@@ -52,8 +63,26 @@ void benchmark_routine(config_t *config) {
     cnt *= alphabet_len;
   }
 
-  float elapsed = (end.tv_sec - start.tv_sec) * 1000.0f + (end.tv_usec - start.tv_usec) / 1000.0f;
-  printf("Bruteforced %ld items. Time elapsed: %.4f\n", cnt, elapsed);
+  float elapsed = ((end.tv_sec - start.tv_sec) * 1000.0f + (end.tv_usec - start.tv_usec) / 1000.0f) / 1000.0;
+  float perf = cnt * 1.0 / elapsed;
+
+  printf("Bruteforced: %ld items.\n", cnt);
+  printf("Time elapsed: %.4f seconds\n", elapsed);
+  printf("Performance: %.2f hashes / sec", perf);
+}
+
+int parse_params(int start_arg_ind, int end_arg_ind, char*argv[], config_t *config){
+  for (int i = start_arg_ind; i <= end_arg_ind; ++i){
+    if (strcmp("-r", argv[i]) == 0) {
+      config->bruteforce_mode = BF_REC;
+      config->brute_function = bruteforce_rec;
+    }
+
+    if (strcmp("-i", argv[i]) == 0) {
+      config->bruteforce_mode = BF_ITER;
+      config->brute_function = bruteforce_iter;
+    }
+  }
 }
 
 int parse_args(int argc, char *argv[], config_t *config) {
@@ -93,12 +122,17 @@ int parse_args(int argc, char *argv[], config_t *config) {
 
     config->app_mode = APP_MODE_DECRYPT;
     config->value = argv[2];
+    
+    parse_params(3, arg_cnt, argv, config);
 
     return EXIT_SUCCESS;
   }
 
-  if (strcmp("benchmark", mode) == 0){
+  if (strcmp("benchmark", mode) == 0) {
     config->app_mode = APP_MODE_BENCHMARK;
+
+    parse_params(2, arg_cnt, argv, config);
+
     return EXIT_SUCCESS;
   }
 
@@ -111,7 +145,11 @@ int main(int argc, char *argv[]) {
   config_t config = {
     .app_mode = APP_MODE_HELP,
 
-    .alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890",
+    .bruteforce_mode = BF_ITER,
+    .brute_function = bruteforce_iter,
+
+    // Password sacred knowledge (i.e. possible characters, possible length)
+    .alphabet = "abcdefghijklmnopqrstuvwxyz",
     .length = 4
   };
 
