@@ -34,6 +34,10 @@ void decrypt_routine(config_t *config) {
     .to = config->length
   };
 
+  for (int i = 0; i < initial_task.to; i++){
+    initial_task.password[i] = config->alphabet[0];
+  }
+
   config->brute_function(&initial_task, config, check_task);
 
   if (config->result.found != false) {
@@ -46,7 +50,14 @@ void decrypt_routine(config_t *config) {
 void benchmark_routine(config_t *config) {
   debug("Started benchmark in %s mode\n", config->bruteforce_mode == BF_ITER ? "iterative" : "recursive");
 
-  task_t initial_task = {.from = 0, .to = config->length};
+  task_t initial_task = {
+    .from = 0, 
+    .to = config->length
+  };
+
+  for (int i = 0; i < initial_task.to; i++){
+    initial_task.password[i] = config->alphabet[0];
+  }
 
   struct timeval start;
   struct timeval end;
