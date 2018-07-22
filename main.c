@@ -16,7 +16,8 @@ void help_routine() {
   printf("uberforcer benchmark <args>\t\t\tperform benchmarking\n");
   printf("\n");
   printf("Available arguments:\n");
-  printf("-r or -i\t\ta bruteforcer algorithm - iterative or recursive");
+  printf("-r or --recursive\t\tuse recursive bruteforcing algorithm; mutually exclusive with --iterative\n");
+  printf("-i or --iterative\t\t[default] use iterative bruteforcing algorithm; mutually exclusive with --recursive\n");
 }
 
 void encrypt_routine(config_t *config) {
@@ -85,12 +86,12 @@ void benchmark_routine(config_t *config) {
 
 int parse_params(int start_arg_ind, int end_arg_ind, char*argv[], config_t *config){
   for (int i = start_arg_ind; i <= end_arg_ind; ++i){
-    if (strcmp("-r", argv[i]) == 0) {
+    if (strcmp("-r", argv[i]) == 0 || strcmp("--recursive", argv[i]) == 0) {
       config->bruteforce_mode = BF_REC;
       config->brute_function = bruteforce_rec;
     }
 
-    if (strcmp("-i", argv[i]) == 0) {
+    if (strcmp("-i", argv[i]) == 0 || strcmp("--iterative", argv[i]) == 0) {
       config->bruteforce_mode = BF_ITER;
       config->brute_function = bruteforce_iter;
     }
