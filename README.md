@@ -7,3 +7,9 @@ Attempt to write a super-efficient bruteforcing tool for learning purposes on pu
 1. Single-threading task
 2. Multi-threading task
 3. Client-server task, i.e. master & workers
+
+# How to build
+gcc -o uberforcer.exe -O2 main.c crypt3.h crypt3.c config.h common.h check.c check.h bruteforce.c bruteforce.h
+
+Use -DDEBUG=1 key to build app with verbose info
+Use -DDEBUG=2 key to build app with trace info
