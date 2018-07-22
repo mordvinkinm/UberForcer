@@ -2,28 +2,15 @@
 #define CONFIG_H
 
 #include "common.h"
-
-#define MAX_LEN (20)
+#include "struct.h"
+#include "queue.h"
 
 typedef enum { 
   APP_MODE_HELP, 
   APP_MODE_CRYPT,
   APP_MODE_DECRYPT,
   APP_MODE_BENCHMARK
-} app_mode_t;
-
-typedef char password_t[MAX_LEN + 1];
-
-typedef struct result_s {
-  password_t password;
-  bool found;
-} result_t;
-
-typedef struct task_s {
-  password_t password;
-  int from;
-  int to;
-} task_t;
+} app_mode_t; 
 
 typedef enum {
   BF_ITER,

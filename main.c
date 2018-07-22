@@ -7,6 +7,7 @@
 #include "parse_args.h"
 #include "check.h"
 #include "config.h"
+#include "struct.h"
 #include "crypt3.h"
 
 void bruteforce(config_t *config) {
