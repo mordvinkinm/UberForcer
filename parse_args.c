@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "config.h"
+#include "check.h"
 #include "bruteforce.h"
 
 int parse_params(int start_arg_ind, int end_arg_ind, char *argv[], config_t *config) {
@@ -90,6 +91,7 @@ int parse_args(int argc, char *argv[], config_t *config) {
     }
 
     config->app_mode = APP_MODE_DECRYPT;
+    config->check_function = check_task;
     config->value = argv[2];
     
     return parse_params(3, arg_cnt, argv, config);
@@ -97,6 +99,7 @@ int parse_args(int argc, char *argv[], config_t *config) {
 
   if (strcmp("benchmark", mode) == 0) {
     config->app_mode = APP_MODE_BENCHMARK;
+    config->check_function = check_task_benchmark;
 
     return parse_params(2, arg_cnt, argv, config);
   }

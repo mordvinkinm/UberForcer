@@ -9,6 +9,19 @@
 #include "config.h"
 #include "crypt3.h"
 
+void bruteforce(config_t *config) {
+ task_t initial_task = {
+    .from = 0, 
+    .to = config->length
+  };
+
+  for (int i = 0; i < initial_task.to; i++){
+    initial_task.password[i] = config->alphabet[0];
+  }
+
+  config->brute_function(&initial_task, config, config->check_function);
+}
+
 void help_routine() {
   printf("Available commands:\n\n");
   printf("uberforcer help\t\t\t\tshow help file\n");
@@ -34,16 +47,7 @@ void encrypt_routine(config_t *config) {
 void decrypt_routine(config_t *config) {
   debug("Started decryption in %s mode\n", config->bruteforce_mode == BF_ITER ? "iterative" : "recursive");
 
-  task_t initial_task = {
-    .from = 0, 
-    .to = config->length
-  };
-
-  for (int i = 0; i < initial_task.to; i++){
-    initial_task.password[i] = config->alphabet[0];
-  }
-
-  config->brute_function(&initial_task, config, check_task);
+  bruteforce(config);
 
   if (config->result.found != false) {
     printf("Result found: %s\n", config->result.password);
@@ -55,21 +59,12 @@ void decrypt_routine(config_t *config) {
 void benchmark_routine(config_t *config) {
   debug("Started benchmark in %s mode\n", config->bruteforce_mode == BF_ITER ? "iterative" : "recursive");
 
-  task_t initial_task = {
-    .from = 0, 
-    .to = config->length
-  };
-
-  for (int i = 0; i < initial_task.to; i++){
-    initial_task.password[i] = config->alphabet[0];
-  }
-
   struct timeval start;
   struct timeval end;
 
   gettimeofday(&start, NULL);
 
-  config->brute_function(&initial_task, config, check_task_benchmark);
+  bruteforce(config);
 
   gettimeofday(&end, NULL);
 
@@ -89,12 +84,13 @@ void benchmark_routine(config_t *config) {
 
 int main(int argc, char *argv[]) {
   config_t config = {
-    .app_mode = APP_MODE_HELP,
-
-    .bruteforce_mode = BF_ITER,
     .brute_function = bruteforce_iter,
+    .check_function = check_task,
 
-    // Password sacred knowledge (i.e. possible characters, possible length)
+    .app_mode = APP_MODE_HELP,
+    .bruteforce_mode = BF_ITER,
+
+    // Default parameters
     .alphabet = "abcdefghijklmnopqrstuvwxyz",
     .length = 4
   };
