@@ -7,15 +7,17 @@
 void check_task(config_t* config, char* result) {
   trace("Password checked: %s\n", result);
 
-  if (strcmp(crypt(result, config->value), config->value) == 0) {
+  char buf[CRYPT_HASH_SIZE];
+  if (strcmp(crypt(result, config->value, &buf[0]), config->value) == 0) {
     config->result.found = true;
     strcpy(config->result.password, result);
   }
 }
 
-void check_task_benchmark(config_t* config, char* result){
+void check_task_benchmark(config_t* config, char* result) {
   trace("Password checked: %s\n", result);
   
   // prevent "unused" variable from optimization
-  volatile int whatever = strcmp(crypt(result, "salt"), "hash");
+  char buf[CRYPT_HASH_SIZE];
+  volatile int whatever = strcmp(crypt(result, "salt", &buf[0]), "hash");
 }

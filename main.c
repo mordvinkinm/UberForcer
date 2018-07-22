@@ -22,7 +22,8 @@ void help_routine() {
 void encrypt_routine(config_t *config) {
   debug("Started encryption with: password=%s, salt=%s\n", config->value, config->salt);
 
-  char *encrypted = crypt(config->value, config->salt);
+  char buf[CRYPT_HASH_SIZE];
+  char *encrypted = crypt(config->value, config->salt, &buf[0]);
   printf("%s", encrypted);
 }
 
