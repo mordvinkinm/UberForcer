@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
     .bruteforce_mode = BF_ITER,
 
     // Default parameters
-    .alphabet = "abcdefghijklmnopqrstuvwxyz",
+    .alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890",
     .length = 4
   };
 
