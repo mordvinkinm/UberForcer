@@ -3,8 +3,8 @@
 
 #include "config.h"
 
-void check_task(config_t* config, char* result);
+void check_task(config_t* config, task_t* result);
 
-void check_task_benchmark(config_t* config, char* result);
+void check_task_benchmark(config_t* config, task_t* result);
 
 #endif /* CHECK_H */

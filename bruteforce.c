@@ -2,7 +2,7 @@
 
 #include "config.h"
 
-void bruteforce_rec(task_t* task, config_t* config, void (*check_handler)(config_t* congfig, char* task)) {
+void bruteforce_rec(task_t* task, config_t* config, void (*check_handler)(config_t* congfig, task_t* task)) {
   if (config->result.found != false) 
     return;
 
@@ -13,7 +13,7 @@ void bruteforce_rec(task_t* task, config_t* config, void (*check_handler)(config
       if (config->result.found != false) 
         return;
 
-      check_handler(config, task->password);
+      check_handler(config, task);
     } else {
       if (config->result.found != false) 
         return;

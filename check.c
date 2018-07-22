@@ -4,20 +4,20 @@
 #include "common.h"
 #include "crypt3.h"
 
-void check_task(config_t* config, char* result) {
-  trace("Password checked: %s\n", result);
+void check_task(config_t* config, task_t* result) {
+  trace("Password checked: %s\n", result->password);
 
   char buf[CRYPT_HASH_SIZE];
-  if (strcmp(crypt(result, config->value, &buf[0]), config->value) == 0) {
+  if (strcmp(crypt(result->password, config->value, &buf[0]), config->value) == 0) {
     config->result.found = true;
-    strcpy(config->result.password, result);
+    strcpy(config->result.password, result->password);
   }
 }
 
-void check_task_benchmark(config_t* config, char* result) {
-  trace("Password checked: %s\n", result);
+void check_task_benchmark(config_t* config, task_t* result) {
+  trace("Password checked: %s\n", result->password);
   
   // prevent "unused" variable from optimization
   char buf[CRYPT_HASH_SIZE];
-  volatile int whatever = strcmp(crypt(result, "salt", &buf[0]), "hash");
+  volatile int whatever = strcmp(crypt(result->password, "salt", &buf[0]), "hash");
 }
