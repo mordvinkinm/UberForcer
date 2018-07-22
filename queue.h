@@ -4,7 +4,7 @@
 #include <semaphore.h>
 #include <pthread.h>
 
-#include "config.h"
+#include "struct.h"
 
 #define QUEUE_SIZE (10)
 
