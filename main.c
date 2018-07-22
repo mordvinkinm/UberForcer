@@ -10,14 +10,16 @@
 
 void help_routine() {
   printf("Available commands:\n\n");
-  printf("uberforcer help\t\t\t\t\tshow help file\n");
-  printf("uberforcer crypt <password> <salt>\t\tcall crypt function\n");
-  printf("uberforcer decrypt <hash> <args>\t\tcall decrypt function\n");
-  printf("uberforcer benchmark <args>\t\t\tperform benchmarking\n");
+  printf("uberforcer help\t\t\t\tshow help file\n");
+  printf("uberforcer crypt <password> <salt>\tcall crypt function\n");
+  printf("uberforcer decrypt <hash> <args>\tcall decrypt function\n");
+  printf("uberforcer benchmark <args>\t\tperform benchmarking\n");
   printf("\n");
   printf("Available arguments:\n");
-  printf("-r or --recursive\t\tuse recursive bruteforcing algorithm; mutually exclusive with --iterative\n");
-  printf("-i or --iterative\t\t[default] use iterative bruteforcing algorithm; mutually exclusive with --recursive\n");
+  printf("-r or --recursive\t\t\tuse recursive bruteforcing algorithm; mutually exclusive with --iterative\n");
+  printf("-i or --iterative\t\t\t[default] use iterative bruteforcing algorithm; mutually exclusive with --recursive\n");
+  printf("-a <value> or --alphabet <value>\tavailable alphabet\n");
+  printf("-l <value> or --length <value>\t\tpresumed length of password\n");
 }
 
 void encrypt_routine(config_t *config) {
@@ -95,7 +97,42 @@ int parse_params(int start_arg_ind, int end_arg_ind, char*argv[], config_t *conf
       config->bruteforce_mode = BF_ITER;
       config->brute_function = bruteforce_iter;
     }
+
+    if (strcmp("-a", argv[i]) == 0 || strcmp("--alphabet", argv[i]) == 0) {
+      if (i + 1 <= end_arg_ind) {
+        config->alphabet = argv[i + 1];
+        ++i;
+      } else {
+        fprintf(stderr, "Value of alphabet key is not provided");
+        return EXIT_FAILURE;
+      }
+    }
+
+    if (strcmp("-l", argv[i]) == 0 || strcmp("--length", argv[i]) == 0) {
+      if (i + 1 <= end_arg_ind) {
+        int valueLen = strlen(argv[i + 1]);
+        if (valueLen < 1 || valueLen > 8){
+          fprintf(stderr, "Length key specified, but value is invalid. It should be numeric between 1 and 99 999 999.");
+          return EXIT_FAILURE;
+        }
+
+        for (int j = 0; j < valueLen; j++) {
+          if (argv[i + 1][j] < '0' || argv[i + 1][j] > '9'){
+            fprintf(stderr, "Length key specified, but value is invalid. It should be numeric between 1 and 99 999 999.");
+            return EXIT_FAILURE;
+          }
+        }
+
+        config->length = atoi(argv[i + 1]);
+        ++i;
+      } else {
+        fprintf(stderr, "Length key specified, but value is not provided");
+        return EXIT_FAILURE;
+      }
+    }
   }
+
+  return EXIT_SUCCESS;
 }
 
 int parse_args(int argc, char *argv[], config_t *config) {
@@ -136,17 +173,13 @@ int parse_args(int argc, char *argv[], config_t *config) {
     config->app_mode = APP_MODE_DECRYPT;
     config->value = argv[2];
     
-    parse_params(3, arg_cnt, argv, config);
-
-    return EXIT_SUCCESS;
+    return parse_params(3, arg_cnt, argv, config);
   }
 
   if (strcmp("benchmark", mode) == 0) {
     config->app_mode = APP_MODE_BENCHMARK;
 
-    parse_params(2, arg_cnt, argv, config);
-
-    return EXIT_SUCCESS;
+    return parse_params(2, arg_cnt, argv, config);
   }
 
   fprintf(stderr, "Command not recognized: %s\n", mode);
