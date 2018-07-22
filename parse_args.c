@@ -5,6 +5,21 @@
 #include "check.h"
 #include "bruteforce.h"
 
+bool validate_integer(char* s) {
+  int valueLen = strlen(s);
+  if (valueLen < 1 || valueLen > 8){
+    return EXIT_FAILURE;
+  }
+
+  for (int j = 0; j < valueLen; j++) {
+    if (s[j] < '0' || s[j] > '9'){
+      return EXIT_FAILURE;
+    }
+  }
+
+  return EXIT_SUCCESS;
+}
+
 int parse_params(int start_arg_ind, int end_arg_ind, char *argv[], config_t *config) {
   for (int i = start_arg_ind; i <= end_arg_ind; ++i){
     if (strcmp("-r", argv[i]) == 0 || strcmp("--recursive", argv[i]) == 0) {
@@ -29,17 +44,9 @@ int parse_params(int start_arg_ind, int end_arg_ind, char *argv[], config_t *con
 
     if (strcmp("-l", argv[i]) == 0 || strcmp("--length", argv[i]) == 0) {
       if (i + 1 <= end_arg_ind) {
-        int valueLen = strlen(argv[i + 1]);
-        if (valueLen < 1 || valueLen > 8){
+        if (EXIT_SUCCESS != validate_integer(argv[i + 1])) {
           fprintf(stderr, "Length key specified, but value is invalid. It should be numeric between 1 and 99 999 999.");
           return EXIT_FAILURE;
-        }
-
-        for (int j = 0; j < valueLen; j++) {
-          if (argv[i + 1][j] < '0' || argv[i + 1][j] > '9'){
-            fprintf(stderr, "Length key specified, but value is invalid. It should be numeric between 1 and 99 999 999.");
-            return EXIT_FAILURE;
-          }
         }
 
         config->length = atoi(argv[i + 1]);
