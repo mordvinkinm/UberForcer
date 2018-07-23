@@ -53,9 +53,11 @@ void * client_worker (void * arg) {
 
     config->brute_function(&task, config, config->check_function);
 
+    debug("Worker %d finished execution and waiting to acquire the num_tasks lock. Task: [from: %d, to: %d, password: %s]\n", args->thread_number, task.from, task.to, task.password);
+
     pthread_mutex_lock(&config->num_tasks_mutex);
     --config->num_tasks;
-    debug("Worker %d completed task. Remaining: %d\n", args->thread_number, config->num_tasks);
+    debug("Worker %d obtained the num_tasks lock. Remaining: %d\n", args->thread_number, config->num_tasks);
     pthread_mutex_unlock(&config->num_tasks_mutex);
 
     if (config->num_tasks == 0)
@@ -104,14 +106,20 @@ void multi_brute(config_t *config) {
 
   config->brute_function (&task, config, add_to_queue);     
 
+  debug("All tasks have been generated. Acquiring lock num_tasks_mutex...\n");
   pthread_mutex_lock(&config->num_tasks_mutex);
-  while (config->num_tasks > 0)
+  debug("num_tasks_mutex lock has been acquired by tasks generator. Tasks remaining: %d\n", config->num_tasks);
+  while (config->num_tasks > 0){
+    debug("[Generator Thread] Waiting for signal...\n");
     pthread_cond_wait(&config->num_tasks_cv, &config->num_tasks_mutex);
+    debug("[Generator Thread] Signal obtained.\n");
+  }
   pthread_mutex_unlock (&config->num_tasks_mutex);
+  debug("num_tasks_mutex lock has been released by tasks generator\n");
 }
 
 void bruteforce(config_t *config) {
-  if (config->num_threads > 1) {
+  if (config->num_threads > 0) {
     multi_brute(config);
   } else {
     single_brute(config);
