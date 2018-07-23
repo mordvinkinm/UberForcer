@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
+#include <unistd.h>
 
 #include "bruteforce.h"
 #include "parse_args.h"
@@ -10,17 +11,100 @@
 #include "struct.h"
 #include "crypt3.h"
 
-void bruteforce(config_t *config) {
- task_t initial_task = {
+#define LAST_BRUTE_CHARS (2)
+
+void add_to_queue (config_t * config, task_t * task)
+{
+  pthread_mutex_lock(&config->num_tasks_mutex);
+  ++config->num_tasks;
+  pthread_mutex_unlock(&config->num_tasks_mutex);
+  queue_push(&config -> queue, task);
+}
+
+void single_brute(config_t *config) {
+  debug("Started in single-thread mode\n");
+
+  task_t initial_task = {
     .from = 0, 
     .to = config->length
   };
 
-  for (int i = 0; i < initial_task.to; i++){
+  for (int i = 0; i < initial_task.to; i++) {
     initial_task.password[i] = config->alphabet[0];
   }
 
   config->brute_function(&initial_task, config, config->check_function);
+}
+
+void * client_worker (void * arg) {
+  debug("Worker started\n");
+
+  config_t * config = arg;
+
+  task_t task;  
+  for(;;) {   
+    queue_pop (&config->queue, &task);    
+    task.to = task.from;
+    task.from = 0;
+
+    config->brute_function(&task, config, config->check_function);
+
+    pthread_mutex_lock(&config->num_tasks_mutex);
+    --config->num_tasks;
+    pthread_mutex_unlock(&config->num_tasks_mutex);
+
+    if (config->num_tasks == 0)
+      pthread_cond_signal(&config->num_tasks_cv);
+  }
+
+  pthread_exit(EXIT_SUCCESS);
+}
+
+void multi_brute(config_t *config) {
+  debug("Started in multi-thread mode in %d threads\n", config->num_threads);
+
+  queue_init(&config->queue);
+
+  config->num_tasks = 0;      
+
+  pthread_attr_t attr;
+  pthread_attr_init(&attr);
+  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+
+  int cpu;
+  for (cpu = 0; cpu < config->num_threads; cpu++){
+    pthread_t crypt_thread;
+    pthread_create (&crypt_thread, &attr, client_worker, config);
+  }
+
+  task_t initial_task = {
+    .from = 0, 
+    .to = config->length
+  };
+
+  for (int i = 0; i < initial_task.to; i++) {
+    initial_task.password[i] = config->alphabet[0];
+  }
+
+  task_t task;
+  task.from = initial_task.from + LAST_BRUTE_CHARS;
+  task.to = initial_task.to;
+  strcpy(task.password, initial_task.password);
+
+  config->brute_function (&task, config, add_to_queue);     
+
+  pthread_mutex_lock(&config->num_tasks_mutex);
+  while (config->num_tasks > 0)
+    pthread_cond_wait(&config->num_tasks_cv, &config->num_tasks_mutex);
+  pthread_mutex_unlock (&config->num_tasks_mutex);
+}
+
+void bruteforce(config_t *config) {
+  if (config->num_threads > 1) {
+    multi_brute(config);
+  } else {
+    single_brute(config);
+  }
 }
 
 void help_routine() {
@@ -93,7 +177,8 @@ int main(int argc, char *argv[]) {
 
     // Default parameters
     .alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890",
-    .length = 4
+    .length = 4,
+    .num_threads = 1
   };
 
   if (EXIT_SUCCESS == parse_args(argc, argv, &config)) {

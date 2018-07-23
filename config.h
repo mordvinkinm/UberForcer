@@ -28,14 +28,22 @@ typedef struct config_s {
 
   // Working data
   result_t result;
+  queue_t queue;
+  int num_tasks;
 
   // Bruteforce parameters
   char* alphabet;
   int length;
+  int num_threads;
 
   // Input parameters
   char* value;
   char* salt;
+
+  // Multi-threading locks
+  pthread_mutex_t result_mutex;
+  pthread_mutex_t num_tasks_mutex;
+  pthread_cond_t num_tasks_cv;
 } config_t;
 
 #endif /* CONFIG_H */

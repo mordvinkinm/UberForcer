@@ -9,8 +9,10 @@ void check_task(config_t* config, task_t* result) {
 
   char buf[CRYPT_HASH_SIZE];
   if (strcmp(crypt(result->password, config->value, &buf[0]), config->value) == 0) {
+    pthread_mutex_lock(&config->result_mutex);
     config->result.found = true;
     strcpy(config->result.password, result->password);
+    pthread_mutex_unlock(&config->result_mutex);
   }
 }
 

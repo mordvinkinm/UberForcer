@@ -32,6 +32,18 @@ int parse_params(int start_arg_ind, int end_arg_ind, char *argv[], config_t *con
       config->brute_function = bruteforce_iter;
     }
 
+    if (strcmp("-t", argv[i]) == 0 || strcmp("--threads", argv[i]) == 0) {
+      if (i + 1 <= end_arg_ind) {
+        if (EXIT_SUCCESS != validate_integer(argv[i + 1])) {
+          fprintf(stderr, "Threads key specified, but value is invalid. It should be numeric between 1 and 128");
+          return EXIT_FAILURE;
+        }
+
+        config->num_threads = atoi(argv[i + 1]);
+        ++i;
+      }
+    }
+
     if (strcmp("-a", argv[i]) == 0 || strcmp("--alphabet", argv[i]) == 0) {
       if (i + 1 <= end_arg_ind) {
         config->alphabet = argv[i + 1];
