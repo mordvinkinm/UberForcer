@@ -37,9 +37,10 @@ void single_brute(config_t *config) {
 }
 
 void * client_worker (void * arg) {
-  debug("Worker started\n");
+  worker_args_t * args = arg;
+  config_t * config = args->config;
 
-  config_t * config = arg;
+  debug("Worker #%d started", args->thread_number);
 
   task_t task;  
   for(;;) {   
@@ -57,6 +58,8 @@ void * client_worker (void * arg) {
       pthread_cond_signal(&config->num_tasks_cv);
   }
 
+  debug("Client worker #%d finished", args->thread_number);
+
   pthread_exit(EXIT_SUCCESS);
 }
 
@@ -72,9 +75,10 @@ void multi_brute(config_t *config) {
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
   int cpu;
-  for (cpu = 0; cpu < config->num_threads; cpu++){
+  for (cpu = 0; cpu < config->num_threads; cpu++) {
     pthread_t crypt_thread;
-    pthread_create (&crypt_thread, &attr, client_worker, config);
+    worker_args_t args = { .config = config, .thread_number = cpu + 1};
+    pthread_create (&crypt_thread, &attr, client_worker, &args);
   }
 
   task_t initial_task = {

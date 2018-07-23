@@ -45,5 +45,10 @@ typedef struct config_s {
   pthread_mutex_t num_tasks_mutex;
   pthread_cond_t num_tasks_cv;
 } config_t;
+  
+typedef struct worker_args_s {
+  config_t* config;
+  int thread_number;
+} worker_args_t;
 
 #endif /* CONFIG_H */
