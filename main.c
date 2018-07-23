@@ -40,7 +40,7 @@ void * client_worker (void * arg) {
   worker_args_t * args = arg;
   config_t * config = args->config;
 
-  debug("Worker #%d started", args->thread_number);
+  debug("Worker #%d started\n", args->thread_number);
 
   task_t task;  
   for(;;) {   
@@ -52,13 +52,14 @@ void * client_worker (void * arg) {
 
     pthread_mutex_lock(&config->num_tasks_mutex);
     --config->num_tasks;
+    debug("Worker %d completed task. Remaining: %d\n", args->thread_number, config->num_tasks);
     pthread_mutex_unlock(&config->num_tasks_mutex);
 
     if (config->num_tasks == 0)
       pthread_cond_signal(&config->num_tasks_cv);
   }
 
-  debug("Client worker #%d finished", args->thread_number);
+  debug("Client worker #%d finished\n", args->thread_number);
 
   pthread_exit(EXIT_SUCCESS);
 }
@@ -74,11 +75,14 @@ void multi_brute(config_t *config) {
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
-  int cpu;
-  for (cpu = 0; cpu < config->num_threads; cpu++) {
-    pthread_t crypt_thread;
-    worker_args_t args = { .config = config, .thread_number = cpu + 1};
-    pthread_create (&crypt_thread, &attr, client_worker, &args);
+  pthread_t threads[config->num_threads];
+  worker_args_t args[config->num_threads];
+
+  for (int cpu = 0; cpu < config->num_threads; cpu++) {
+    args[cpu].config = config;
+    args[cpu].thread_number = cpu + 1;
+
+    pthread_create (&threads[cpu], &attr, client_worker, &args[cpu]);
   }
 
   task_t initial_task = {
