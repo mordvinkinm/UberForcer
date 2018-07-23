@@ -17,6 +17,7 @@ void add_to_queue (config_t * config, task_t * task)
 {
   pthread_mutex_lock(&config->num_tasks_mutex);
   ++config->num_tasks;
+  debug("Task [from: %d, to: %d, password: %s added to the queue. Tasks remaining: %d\n", task->from, task->to, task->password, config->num_tasks);
   pthread_mutex_unlock(&config->num_tasks_mutex);
   queue_push(&config -> queue, task);
 }
@@ -47,6 +48,8 @@ void * client_worker (void * arg) {
     queue_pop (&config->queue, &task);    
     task.to = task.from;
     task.from = 0;
+
+    debug("Worker %d started execution of task: [from: %d, to: %d, password: %s]\n", args->thread_number, task.from, task.to, task.password);
 
     config->brute_function(&task, config, config->check_function);
 
