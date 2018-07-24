@@ -5,14 +5,18 @@
 #include "crypt3.h"
 
 void check_task(config_t* config, task_t* result) {
-  trace("Password checked: %s\n", result->password);
-
   char buf[CRYPT_HASH_SIZE];
-  if (strcmp(crypt(result->password, config->value, &buf[0]), config->value) == 0) {
+  char* hash = crypt(result->password, config->value, &buf[0]);
+
+  trace("Password checked: %s, hash: %s\n", result->password, hash);
+  if (strcmp(hash, config->value) == 0) {
+    debug("Result found, trying to acquire mutex: %s\n", result->password);
     pthread_mutex_lock(&config->result_mutex);
+    debug("Result found, mutex acquired: %s\n", result->password);
     config->result.found = true;
     strcpy(config->result.password, result->password);
     pthread_mutex_unlock(&config->result_mutex);
+    debug("Result found, mutex released: %s\n", result->password);
   }
 }
 
