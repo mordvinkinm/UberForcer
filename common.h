@@ -7,7 +7,7 @@
 #define true 1
 #define false 0
 
-#define DEBUG_VERBOSE 1
+#define DEBUG_LOG 1
 #define DEBUG_TRACE 2
 
 // Define debug method
