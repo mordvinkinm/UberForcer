@@ -79,6 +79,7 @@ void multi_brute(config_t *config) {
   pthread_attr_t attr;
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+  pthread_cond_init(&config->num_tasks_cv, NULL);
 
   pthread_t threads[config->num_threads];
   worker_args_t args[config->num_threads];
@@ -109,7 +110,7 @@ void multi_brute(config_t *config) {
   debug("All tasks have been generated. Acquiring lock num_tasks_mutex...\n");
   pthread_mutex_lock(&config->num_tasks_mutex);
   debug("num_tasks_mutex lock has been acquired by tasks generator. Tasks remaining: %d\n", config->num_tasks);
-  while (config->num_tasks > 0){
+  while (config->num_tasks > 0) {
     debug("[Generator Thread] Waiting for signal...\n");
     pthread_cond_wait(&config->num_tasks_cv, &config->num_tasks_mutex);
     debug("[Generator Thread] Signal obtained.\n");
