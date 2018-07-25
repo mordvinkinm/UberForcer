@@ -375,12 +375,11 @@ void encrypt(char *block)
 * Returns:     Pointer to static array containing the salt concatenated
 *              on to the encrypted results.  Same as stored in passwd file.
 **************************************************************************/
-char *crypt(char *pw, char *salt)
+char *crypt(char *pw, char *salt, char *iobuf)
 {
     int i, j, temp;
     char c,
          block[66];             /* 1st store key, then results */
-    static char iobuf[16];      /* encrypted results */
 
     for(i = 0; i < 66; i++)
         block[i] = 0;
@@ -456,5 +455,5 @@ char *crypt(char *pw, char *salt)
     if(iobuf[1] == '\0')
         iobuf[1] = iobuf[0];
 
-    return(iobuf);
+    return iobuf;
 }
