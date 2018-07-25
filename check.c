@@ -1,8 +1,8 @@
 #include <string.h>
 
+#include "lib/crypt3.h"
 #include "config.h"
 #include "common.h"
-#include "crypt3.h"
 
 void check_task(config_t* config, task_t* result) {
   char buf[CRYPT_HASH_SIZE];

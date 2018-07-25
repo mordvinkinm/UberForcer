@@ -4,12 +4,12 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#include "lib/crypt3.h"
 #include "bruteforce.h"
 #include "parse_args.h"
 #include "check.h"
 #include "config.h"
 #include "struct.h"
-#include "crypt3.h"
 
 #define LAST_BRUTE_CHARS (2)
 
