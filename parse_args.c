@@ -5,6 +5,21 @@
 #include "check.h"
 #include "bruteforce.h"
 
+bool validate_integer(char* s) {
+  int valueLen = strlen(s);
+  if (valueLen < 1 || valueLen > 8){
+    return EXIT_FAILURE;
+  }
+
+  for (int j = 0; j < valueLen; j++) {
+    if (s[j] < '0' || s[j] > '9'){
+      return EXIT_FAILURE;
+    }
+  }
+
+  return EXIT_SUCCESS;
+}
+
 int parse_params(int start_arg_ind, int end_arg_ind, char *argv[], config_t *config) {
   for (int i = start_arg_ind; i <= end_arg_ind; ++i){
     if (strcmp("-r", argv[i]) == 0 || strcmp("--recursive", argv[i]) == 0) {
@@ -15,6 +30,18 @@ int parse_params(int start_arg_ind, int end_arg_ind, char *argv[], config_t *con
     if (strcmp("-i", argv[i]) == 0 || strcmp("--iterative", argv[i]) == 0) {
       config->bruteforce_mode = BF_ITER;
       config->brute_function = bruteforce_iter;
+    }
+
+    if (strcmp("-t", argv[i]) == 0 || strcmp("--threads", argv[i]) == 0) {
+      if (i + 1 <= end_arg_ind) {
+        if (EXIT_SUCCESS != validate_integer(argv[i + 1])) {
+          fprintf(stderr, "Threads key specified, but value is invalid. It should be numeric between 1 and 128");
+          return EXIT_FAILURE;
+        }
+
+        config->num_threads = atoi(argv[i + 1]);
+        ++i;
+      }
     }
 
     if (strcmp("-a", argv[i]) == 0 || strcmp("--alphabet", argv[i]) == 0) {
@@ -29,17 +56,9 @@ int parse_params(int start_arg_ind, int end_arg_ind, char *argv[], config_t *con
 
     if (strcmp("-l", argv[i]) == 0 || strcmp("--length", argv[i]) == 0) {
       if (i + 1 <= end_arg_ind) {
-        int valueLen = strlen(argv[i + 1]);
-        if (valueLen < 1 || valueLen > 8){
+        if (EXIT_SUCCESS != validate_integer(argv[i + 1])) {
           fprintf(stderr, "Length key specified, but value is invalid. It should be numeric between 1 and 99 999 999.");
           return EXIT_FAILURE;
-        }
-
-        for (int j = 0; j < valueLen; j++) {
-          if (argv[i + 1][j] < '0' || argv[i + 1][j] > '9'){
-            fprintf(stderr, "Length key specified, but value is invalid. It should be numeric between 1 and 99 999 999.");
-            return EXIT_FAILURE;
-          }
         }
 
         config->length = atoi(argv[i + 1]);
@@ -94,14 +113,24 @@ int parse_args(int argc, char *argv[], config_t *config) {
     config->check_function = check_task;
     config->value = argv[2];
     
-    return parse_params(3, arg_cnt, argv, config);
+    if (EXIT_SUCCESS == parse_params(3, arg_cnt, argv, config)) {
+      config->check_function = config->num_threads > 1 ? check_task_r : check_task;
+      return EXIT_SUCCESS;
+    } else {
+      return EXIT_FAILURE;
+    }
   }
 
   if (strcmp("benchmark", mode) == 0) {
     config->app_mode = APP_MODE_BENCHMARK;
     config->check_function = check_task_benchmark;
 
-    return parse_params(2, arg_cnt, argv, config);
+    if (EXIT_SUCCESS == parse_params(2, arg_cnt, argv, config)) {
+      config->check_function = config->num_threads > 1 ? check_task_benchmark_r : check_task_benchmark;
+      return EXIT_SUCCESS;
+    } else {
+      return EXIT_FAILURE;
+    }
   }
 
   fprintf(stderr, "Command not recognized: %s\n", mode);

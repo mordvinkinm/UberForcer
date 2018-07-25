@@ -30,6 +30,8 @@
 *            the function crypt().
 **************************************************************************/
 
+#include "crypt3.h"
+
 /* Initial permutation */
 static const char IP[] =
 {
@@ -179,6 +181,66 @@ void setkey(char *key)
     /* load E with the initial E bit selections */
     for(i=0; i < 48; i++)
         E[i] = e2[i];
+}
+
+/**************************************************************************
+* Function:    setkey_r
+*
+* Description: Set up the key schedule from the encryption key.
+*
+* Inputs:      char *key
+*              pointer to 64 character array.  Each character represents a
+*              bit in the key.
+*
+* Returns:     none
+**************************************************************************/
+void setkey_r(char *key, char (*C)[28], char (*D)[28], char (*E)[48], char (*KS)[16][48])
+{
+    int i, j, k, temp;
+
+    /**********************************************************************
+    * First, generate C and D by permuting the key.  The low order bit of
+    * each 8-bit char is not used, so C and D are only 28 bits apiece.
+    **********************************************************************/
+    for(i = 0; i < 28; i++)
+    {
+        (*C)[i] = key[PC1_C[i] - 1];
+        (*D)[i] = key[PC1_D[i] - 1];
+    }
+
+    /**********************************************************************
+    * To generate Ki, rotate C and D according to schedule and pick up a
+    * permutation using PC2.
+    **********************************************************************/
+    for(i = 0; i < 16; i++)
+    {
+        /* rotate */
+        for(k = 0; k < shifts[i]; k++)
+        {
+            temp = (*C)[0];
+
+            for(j = 0; j < 28 - 1; j++)
+                (*C)[j] = (*C)[j+1];
+
+            (*C)[27] = temp;
+            temp = (*D)[0];
+            for(j = 0; j < 28 - 1; j++)
+                (*D)[j] = (*D)[j+1];
+
+            (*D)[27] = temp;
+        }
+
+        /* get Ki. Note C and D are concatenated */
+        for(j = 0; j < 24; j++)
+        {
+            (*KS)[i][j] = (*C)[PC2_C[j] - 1];
+            (*KS)[i][j + 24] = (*D)[PC2_D[j] - 28 -1];
+        }
+    }
+
+    /* load E with the initial E bit selections */
+    for(i=0; i < 48; i++)
+        (*E)[i] = e2[i];
 }
 
 /**************************************************************************
@@ -363,6 +425,106 @@ void encrypt(char *block)
 }
 
 /**************************************************************************
+* Function:    encrypt_r
+*
+* Description: Uses DES to encrypt a 64 bit block of data.  Requires
+*              setkey to be invoked with the encryption key before it may
+*              be used.  The results of the encryption are stored in block.
+*
+* Inputs:      char *block
+*              pointer to 64 character array.  Each character represents a
+*              bit in the data block.
+*
+* Returns:     none
+**************************************************************************/
+void encrypt_r(char *block, char (*E)[48], char (*KS)[16][48])
+{
+    int i, ii, temp, j, k;
+
+    char left[32], right[32]; /* block in two halves */
+    char old[32];
+    char f[32];
+    char preS[48];
+
+    /* First, permute the bits in the input */
+    for(j = 0; j < 32; j++)
+        left[j] = block[IP[j] - 1];
+
+    for(;j < 64; j++)
+        right[j - 32] = block[IP[j] - 1];
+
+    /* Perform an encryption operation 16 times. */
+    for(ii= 0; ii < 16; ii++)
+    {
+        i = ii;
+        /* Save the right array, which will be the new left. */
+        for(j = 0; j < 32; j++)
+            old[j] = right[j];
+
+        /******************************************************************
+        * Expand right to 48 bits using the E selector and
+        * exclusive-or with the current key bits.
+        ******************************************************************/
+        for(j =0 ; j < 48; j++)
+            preS[j] = right[(*E)[j] - 1] ^ (*KS)[i][j];
+
+        /******************************************************************
+        * The pre-select bits are now considered in 8 groups of 6 bits ea.
+        * The 8 selection functions map these 6-bit quantities into 4-bit
+        * quantities and the results are permuted to make an f(R, K).
+        * The indexing into the selection functions is peculiar;
+        * it could be simplified by rewriting the tables.
+        ******************************************************************/
+        for(j = 0; j < 8; j++)
+        {
+            temp = 6 * j;
+            k = S[j][(preS[temp + 0] << 5) +
+                (preS[temp + 1] << 3) +
+                (preS[temp + 2] << 2) +
+                (preS[temp + 3] << 1) +
+                (preS[temp + 4] << 0) +
+                (preS[temp + 5] << 4)];
+
+            temp = 4 * j;
+
+            f[temp + 0] = (k >> 3) & 01;
+            f[temp + 1] = (k >> 2) & 01;
+            f[temp + 2] = (k >> 1) & 01;
+            f[temp + 3] = (k >> 0) & 01;
+        }
+
+        /******************************************************************
+        * The new right is left ^ f(R, K).
+        * The f here has to be permuted first, though.
+        ******************************************************************/
+        for(j = 0; j < 32; j++)
+            right[j] = left[j] ^ f[P[j] - 1];
+
+        /* Finally, the new left (the original right) is copied back. */
+        for(j = 0; j < 32; j++)
+            left[j] = old[j];
+    }
+
+    /* The output left and right are reversed. */
+    for(j = 0; j < 32; j++)
+    {
+        temp = left[j];
+        left[j] = right[j];
+        right[j] = temp;
+    }
+
+    /* The final output gets the inverse permutation of the very original. */
+    for(j = 0; j < 64; j++)
+    {
+        i = FP[j];
+        if (i < 33)
+                block[j] = left[FP[j] - 1];
+        else
+                block[j] = right[FP[j] - 33];
+    }
+}
+
+/**************************************************************************
 * Function:    crypt
 *
 * Description: Clone of Unix crypt(3) function.
@@ -375,11 +537,12 @@ void encrypt(char *block)
 * Returns:     Pointer to static array containing the salt concatenated
 *              on to the encrypted results.  Same as stored in passwd file.
 **************************************************************************/
-char *crypt(char *pw, char *salt, char *iobuf)
+char *crypt(char *pw, char *salt)
 {
     int i, j, temp;
     char c,
          block[66];             /* 1st store key, then results */
+    static char iobuf[16];      /* encrypted results */
 
     for(i = 0; i < 66; i++)
         block[i] = 0;
@@ -455,5 +618,112 @@ char *crypt(char *pw, char *salt, char *iobuf)
     if(iobuf[1] == '\0')
         iobuf[1] = iobuf[0];
 
-    return iobuf;
+    return(iobuf);
 }
+
+/**************************************************************************
+* Function:    crypt_r
+*
+* Description: Clone of Unix crypt(3) function.
+*
+* Inputs:      char *pw
+*              pointer to 8 character encryption key (user password)
+*              char *salt
+*              pointer to 2 character salt used to modify the DES results.
+*
+* Returns:     Pointer to static array containing the salt concatenated
+*              on to the encrypted results.  Same as stored in passwd file.
+**************************************************************************/
+char * crypt_r(char *pw, char *salt, char (*iobuf)[CRYPT_HASH_SIZE])
+{
+    int i, j, temp;
+    char c,
+         block[66];             /* 1st store key, then results */
+
+    /* The C and D arrays used to calculate the key schedule. */
+    char C[28];
+    char D[28];
+
+    /* The key schedule.  Generated from the key. */
+    char KS[16][48];
+
+    /* The E bit-selection table. */
+    char E[48];
+
+    for(i = 0; i < 66; i++)
+        block[i] = 0;
+
+    /* break pw into 64 bits */
+    for(i = 0, c = *pw; c && (i < 64); i++)
+    {
+        for(j = 0; j < 7; j++, i++)
+            block[i] = (c >> (6 - j)) & 01;
+        pw++;
+        c = *pw;
+    }
+
+    /* set key based on pw */
+    setkey_r(block, &C, &D, &E, &KS);
+
+    for(i = 0; i < 66; i++)
+        block[i] = 0;
+
+    for(i = 0; i < 2; i++)
+    {
+        /* store salt at beginning of results */
+        c = *salt++;
+        (*iobuf)[i] = c;
+
+        if(c > 'Z')
+            c -= 6;
+
+        if(c > '9')
+            c -= 7;
+
+        c -= '.';
+
+        /* use salt to effect the E-bit selection */
+        for(j = 0; j < 6; j++)
+        {
+            if((c >> j) & 01)
+            {
+                temp = E[6 * i + j];
+                E[6 * i +j] = E[6 * i + j + 24];
+                E[6 * i + j + 24] = temp;
+            }
+        }
+    }
+
+    /* call DES encryption 25 times using pw as key and initial data = 0 */
+    for(i = 0; i < 25; i++)
+        encrypt_r(block, &E, &KS);
+
+    /* format encrypted block for standard crypt(3) output */
+    for(i=0; i < 11; i++)
+    {
+        c = 0;
+        for(j = 0; j < 6; j++)
+        {
+            c <<= 1;
+            c |= block[6 * i + j];
+        }
+
+        c += '.';
+        if(c > '9')
+            c += 7;
+
+        if(c > 'Z')
+            c += 6;
+
+        (*iobuf)[i + 2] = c;
+    }
+
+    (*iobuf)[i + 2] = '\0';
+
+    /* prevent premature NULL terminator */
+    if((*iobuf)[1] == '\0')
+        (*iobuf)[1] = (*iobuf)[0];
+
+    return iobuf[0];
+}
+
