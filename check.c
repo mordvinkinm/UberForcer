@@ -4,10 +4,25 @@
 #include "config.h"
 #include "common.h"
 
+// Thread-unsafe version
 void check_task(config_t* config, task_t* result) {
-  char buf[CRYPT_HASH_SIZE];
-  char* hash = crypt(result->password, config->value, &buf[0]);
+  if (strcmp(crypt(result->password, config->value), config->value) == 0) {
+    config->result.found = true;
+    strcpy(config->result.password, result->password);
+  }
+}
 
+void check_task_benchmark(config_t* config, task_t* result) {
+  trace("Password checked: %s\n", result->password);
+  
+  // prevent "unused" variable from optimization
+  volatile int whatever = strcmp(crypt(result->password, "salt"), "hash");
+}
+
+// Reentrant versions
+void check_task_r(config_t* config, task_t* result) {
+  char iobuf[CRYPT_HASH_SIZE];
+  char* hash = crypt_r(result->password, config->value, &iobuf);
   trace("Password checked: %s, hash: %s\n", result->password, hash);
   if (strcmp(hash, config->value) == 0) {
     debug("Result found, trying to acquire mutex: %s\n", result->password);
@@ -20,10 +35,10 @@ void check_task(config_t* config, task_t* result) {
   }
 }
 
-void check_task_benchmark(config_t* config, task_t* result) {
+void check_task_benchmark_r(config_t* config, task_t* result) {
   trace("Password checked: %s\n", result->password);
   
   // prevent "unused" variable from optimization
-  char buf[CRYPT_HASH_SIZE];
-  volatile int whatever = strcmp(crypt(result->password, "salt", &buf[0]), "hash");
+  char iobuf[CRYPT_HASH_SIZE];
+  volatile int whatever = strcmp(crypt_r(result->password, "salt", &iobuf), "hash");
 }

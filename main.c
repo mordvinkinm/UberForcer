@@ -120,7 +120,7 @@ void multi_brute(config_t *config) {
 }
 
 void bruteforce(config_t *config) {
-  if (config->num_threads > 0) {
+  if (config->num_threads > 1) {
     multi_brute(config);
   } else {
     single_brute(config);
@@ -144,8 +144,7 @@ void help_routine() {
 void encrypt_routine(config_t *config) {
   debug("Started encryption with: password=%s, salt=%s\n", config->value, config->salt);
 
-  char buf[CRYPT_HASH_SIZE];
-  char *encrypted = crypt(config->value, config->salt, &buf[0]);
+  char *encrypted = crypt(config->value, config->salt);
   printf("%s", encrypted);
 }
 

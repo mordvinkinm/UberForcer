@@ -113,14 +113,24 @@ int parse_args(int argc, char *argv[], config_t *config) {
     config->check_function = check_task;
     config->value = argv[2];
     
-    return parse_params(3, arg_cnt, argv, config);
+    if (EXIT_SUCCESS == parse_params(3, arg_cnt, argv, config)) {
+      config->check_function = config->num_threads > 1 ? check_task_r : check_task;
+      return EXIT_SUCCESS;
+    } else {
+      return EXIT_FAILURE;
+    }
   }
 
   if (strcmp("benchmark", mode) == 0) {
     config->app_mode = APP_MODE_BENCHMARK;
     config->check_function = check_task_benchmark;
 
-    return parse_params(2, arg_cnt, argv, config);
+    if (EXIT_SUCCESS == parse_params(2, arg_cnt, argv, config)) {
+      config->check_function = config->num_threads > 1 ? check_task_benchmark_r : check_task_benchmark;
+      return EXIT_SUCCESS;
+    } else {
+      return EXIT_FAILURE;
+    }
   }
 
   fprintf(stderr, "Command not recognized: %s\n", mode);
