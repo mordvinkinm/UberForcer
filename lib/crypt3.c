@@ -6,6 +6,7 @@
 *             without a need for the crypt library.
 *   Author  : Michael Dipperstein
 *   Date    : November 3, 1998
+*   Edited  : Mikhail Mordvinkin on July 24, 2018
 *
 ***************************************************************************
 *   The source in this file is heavily borrowed from the crypt3.c file
@@ -22,12 +23,18 @@
 *   declarations have been removed, because they generated suboptimal code.
 *   All constant data has been explicitly declared as const and all
 *   declarations have been given a minimal scope, because I'm paranoid.
+*   
 *
 *   Caution: crypt() returns a pointer to static data.  I left it this way
 *            to maintain backward compatibility.  The downside is that
 *            successive calls will cause previous results to be lost.
 *            This can easily be changed with only minor modifications to
 *            the function crypt().
+*
+*   Editor comment:
+*   I've implemented reentrant version of crypt_r and related methods
+*   (basically changed all static arrays by method-specific). 
+*   Use it on your own risk.
 **************************************************************************/
 
 #include "crypt3.h"
@@ -187,6 +194,7 @@ void setkey(char *key)
 * Function:    setkey_r
 *
 * Description: Set up the key schedule from the encryption key.
+*              Thread-safe version of setkey method.
 *
 * Inputs:      char *key
 *              pointer to 64 character array.  Each character represents a
@@ -431,6 +439,8 @@ void encrypt(char *block)
 *              setkey to be invoked with the encryption key before it may
 *              be used.  The results of the encryption are stored in block.
 *
+*              Thread-safe version of encrypt method
+*
 * Inputs:      char *block
 *              pointer to 64 character array.  Each character represents a
 *              bit in the data block.
@@ -625,14 +635,17 @@ char *crypt(char *pw, char *salt)
 * Function:    crypt_r
 *
 * Description: Clone of Unix crypt(3) function.
+*              thread-safe version of crypt method
 *
 * Inputs:      char *pw
 *              pointer to 8 character encryption key (user password)
 *              char *salt
 *              pointer to 2 character salt used to modify the DES results.
+*              char (*iobuf)[16]
+*              pointer to 16 character buffer for output
 *
-* Returns:     Pointer to static array containing the salt concatenated
-*              on to the encrypted results.  Same as stored in passwd file.
+* Returns:     Pointer to *iobuf buffer passed into the method 
+*              to be precise, to the first element of iobuf array
 **************************************************************************/
 char * crypt_r(char *pw, char *salt, char (*iobuf)[CRYPT_HASH_SIZE])
 {
