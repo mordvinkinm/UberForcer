@@ -139,6 +139,7 @@ void help_routine() {
   printf("-i or --iterative\t\t\t[default] use iterative bruteforcing algorithm; mutually exclusive with --recursive\n");
   printf("-a <value> or --alphabet <value>\tavailable alphabet\n");
   printf("-l <value> or --length <value>\t\tpresumed length of password\n");
+  printf("-t <value> or --threads <value>\t\tNumber of threads for multithreading bruteforce\n");
 }
 
 void encrypt_routine(config_t *config) {
