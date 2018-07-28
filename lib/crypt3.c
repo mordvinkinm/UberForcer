@@ -32,8 +32,8 @@
 *            the function crypt().
 *
 *   Editor comment:
-*   I've implemented reentrant version of crypt_r and related methods
-*   (basically changed all static arrays by method-specific). 
+*   I've implemented reentrant version of crypt_r and related functions
+*   (basically changed all static arrays by function-specific). 
 *   Use it on your own risk.
 **************************************************************************/
 
@@ -136,7 +136,7 @@ static const char e2[] =
 * Description: Set up the key schedule from the encryption key.
 *
 * Inputs:      char *key
-*              pointer to 64 character array.  Each character represents a
+*              Pointer to 64 character array.  Each character represents a
 *              bit in the key.
 *
 * Returns:     none
@@ -194,11 +194,18 @@ void setkey(char *key)
 * Function:    setkey_r
 *
 * Description: Set up the key schedule from the encryption key.
-*              Thread-safe version of setkey method.
+*              Thread-safe version of setkey function.
 *
 * Inputs:      char *key
-*              pointer to 64 character array.  Each character represents a
+*              Pointer to 64 character array.  Each character represents a
 *              bit in the key.
+* 
+*              char (*C)[28]
+*              char (*D)[28]
+*              Arrays used to calculate key schedule
+*
+*              char (*KS)[16][48]
+*              Key schedule array
 *
 * Returns:     none
 **************************************************************************/
@@ -341,7 +348,7 @@ static char preS[48];
 *              be used.  The results of the encryption are stored in block.
 *
 * Inputs:      char *block
-*              pointer to 64 character array.  Each character represents a
+*              Pointer to 64 character array.  Each character represents a
 *              bit in the data block.
 *
 * Returns:     none
@@ -439,11 +446,17 @@ void encrypt(char *block)
 *              setkey to be invoked with the encryption key before it may
 *              be used.  The results of the encryption are stored in block.
 *
-*              Thread-safe version of encrypt method
+*              Thread-safe version of encrypt function
 *
 * Inputs:      char *block
-*              pointer to 64 character array.  Each character represents a
+*              Pointer to 64 character array.  Each character represents a
 *              bit in the data block.
+*
+*              char (*E)[48]
+*              E bit selection table
+*
+*              char (*KS)[16][48]
+*              Key schedule array
 *
 * Returns:     none
 **************************************************************************/
@@ -540,9 +553,10 @@ void encrypt_r(char *block, char (*E)[48], char (*KS)[16][48])
 * Description: Clone of Unix crypt(3) function.
 *
 * Inputs:      char *pw
-*              pointer to 8 character encryption key (user password)
+*              Pointer to 8 character encryption key (user password)
+*
 *              char *salt
-*              pointer to 2 character salt used to modify the DES results.
+*              Pointer to 2 character salt used to modify the DES results.
 *
 * Returns:     Pointer to static array containing the salt concatenated
 *              on to the encrypted results.  Same as stored in passwd file.
@@ -635,16 +649,18 @@ char *crypt(char *pw, char *salt)
 * Function:    crypt_r
 *
 * Description: Clone of Unix crypt(3) function.
-*              thread-safe version of crypt method
+*              thread-safe version of crypt function
 *
 * Inputs:      char *pw
-*              pointer to 8 character encryption key (user password)
+*              Pointer to 8 character encryption key (user password)
+
 *              char *salt
-*              pointer to 2 character salt used to modify the DES results.
+*              Pointer to 2 character salt used to modify the DES results.
+
 *              char (*iobuf)[16]
-*              pointer to 16 character buffer for output
+*              Pointer to 16 character buffer for output
 *
-* Returns:     Pointer to *iobuf buffer passed into the method 
+* Returns:     Pointer to *iobuf buffer passed into the function 
 *              to be precise, to the first element of iobuf array
 **************************************************************************/
 char * crypt_r(char *pw, char *salt, char (*iobuf)[CRYPT_HASH_SIZE])
@@ -739,4 +755,3 @@ char * crypt_r(char *pw, char *salt, char (*iobuf)[CRYPT_HASH_SIZE])
 
     return iobuf[0];
 }
-
