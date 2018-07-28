@@ -1,3 +1,26 @@
+/**************************************************************************
+*            Application arguments parsing
+*
+*   File    : parse_args.c
+*   Purpose : Provides ability to parse console application parameters
+*   Author  : Mikhail Mordvinkin
+*   Date    : July 24, 2018
+*
+***************************************************************************
+*   There are two parts:
+*   - Parse main application run mode + required parameters
+*     * help
+*     * crypt <password> <salt>
+*     * decrypt <hash>
+*     * benchmark
+*   
+*   - Parse optional run argument
+*     * Alphabet (i.e. abcdefABCDEF0123)
+*     * Length of original password 
+*     * Bruteforce mode (iterative or recursive)
+*     * Number of threads for multithreading bruteforce
+**************************************************************************/
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -5,22 +28,64 @@
 #include "check.h"
 #include "bruteforce.h"
 
+
+/**************************************************************************
+* Function:    validate_integer
+*
+* Description: Specific validator to ensure that provided char array
+*              can be parsed as integer from 1 to 99999999
+*              
+* Inputs:      char *s
+*              Pointer to a char array to test
+*
+* Returns:     bool (short int alias)
+*              true or false
+* 
+*************************************************************************/
 bool validate_integer(char* s) {
   int valueLen = strlen(s);
   if (valueLen < 1 || valueLen > 8){
-    return EXIT_FAILURE;
+    return false;
   }
 
   for (int j = 0; j < valueLen; j++) {
     if (s[j] < '0' || s[j] > '9'){
-      return EXIT_FAILURE;
+      return false;
     }
   }
 
-  return EXIT_SUCCESS;
+  return true;
 }
 
-int parse_params(int start_arg_ind, int end_arg_ind, char *argv[], config_t *config) {
+
+/**************************************************************************
+* Function:    parse_run_params
+*
+* Description: Parses optional arguments to run the app:
+*               - Number of threads
+*               - Bruteforce mode
+*              etc.
+*
+*              If parsing failed, writes a message to stderr and returns 
+*              EXIT_FAILURE (1). Otherwise, returns EXIT_SUCCESS (0)
+*              
+* Inputs:      int start_arg_ind
+*              Index of first argument in the argv array, since half of 
+*              arguments already was parsed by parse_app_mode (inclusive)
+*
+*              int end_arg_ind
+*              Index of last argument in the argv array (inclusive)
+*
+*              *argv[]
+*              Array of string parameters (argument from main func)
+*
+*              config_t *config
+*              Pointer to application config
+*
+* Returns:     int (exit status) - EXIT_SUCCESS (0) or EXIT_FAILURE (1)
+* 
+*************************************************************************/
+int parse_run_params(int start_arg_ind, int end_arg_ind, char *argv[], config_t *config) {
   for (int i = start_arg_ind; i <= end_arg_ind; ++i){
     if (strcmp("-r", argv[i]) == 0 || strcmp("--recursive", argv[i]) == 0) {
       config->bruteforce_mode = BF_REC;
@@ -34,7 +99,7 @@ int parse_params(int start_arg_ind, int end_arg_ind, char *argv[], config_t *con
 
     if (strcmp("-t", argv[i]) == 0 || strcmp("--threads", argv[i]) == 0) {
       if (i + 1 <= end_arg_ind) {
-        if (EXIT_SUCCESS != validate_integer(argv[i + 1])) {
+        if (true != validate_integer(argv[i + 1])) {
           fprintf(stderr, "Threads key specified, but value is invalid. It should be numeric between 1 and 128");
           return EXIT_FAILURE;
         }
@@ -56,7 +121,7 @@ int parse_params(int start_arg_ind, int end_arg_ind, char *argv[], config_t *con
 
     if (strcmp("-l", argv[i]) == 0 || strcmp("--length", argv[i]) == 0) {
       if (i + 1 <= end_arg_ind) {
-        if (EXIT_SUCCESS != validate_integer(argv[i + 1])) {
+        if (true != validate_integer(argv[i + 1])) {
           fprintf(stderr, "Length key specified, but value is invalid. It should be numeric between 1 and 99 999 999.");
           return EXIT_FAILURE;
         }
@@ -74,6 +139,29 @@ int parse_params(int start_arg_ind, int end_arg_ind, char *argv[], config_t *con
 }
 
 
+/**************************************************************************
+* Function:    parse_args
+*
+* Description: Parses command line arguments to run program:
+*              run mode (help, crypt, decrypt, ...)
+*              required parameters for selected app mode
+*              optional parameters
+*
+*              If parsing was unsuccessful for some reason, writes error to
+*              stderr and returns EXIT_FAILURE
+*              
+* Inputs:      int argc
+*              Number of arguments from command line (argument from main func)
+*
+*              *argv[]
+*              Array of string parameters (argument from main func)
+*
+*              config_t *config
+*              Pointer to application config
+*
+* Returns:     int (exit status) - EXIT_SUCCESS (0) or EXIT_FAILURE (1)
+* 
+*************************************************************************/
 int parse_args(int argc, char *argv[], config_t *config) {
   int arg_cnt = argc - 1;
   if (arg_cnt < 1) {
@@ -113,7 +201,7 @@ int parse_args(int argc, char *argv[], config_t *config) {
     config->check_function = check_task;
     config->value = argv[2];
     
-    if (EXIT_SUCCESS == parse_params(3, arg_cnt, argv, config)) {
+    if (EXIT_SUCCESS == parse_run_params(3, arg_cnt, argv, config)) {
       config->check_function = config->num_threads > 1 ? check_task_r : check_task;
       return EXIT_SUCCESS;
     } else {
@@ -125,7 +213,7 @@ int parse_args(int argc, char *argv[], config_t *config) {
     config->app_mode = APP_MODE_BENCHMARK;
     config->check_function = check_task_benchmark;
 
-    if (EXIT_SUCCESS == parse_params(2, arg_cnt, argv, config)) {
+    if (EXIT_SUCCESS == parse_run_params(2, arg_cnt, argv, config)) {
       config->check_function = config->num_threads > 1 ? check_task_benchmark_r : check_task_benchmark;
       return EXIT_SUCCESS;
     } else {
