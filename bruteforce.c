@@ -30,8 +30,9 @@
 *              Pointer to application config
 *
 *              void (*check_handler)(config_t *config, task_t *task)
-*              Pointer to function that checks generated result against 
-*              target hash
+*              Pointer to function that will be run for each bruteforce result
+*              (for example, function to check hash; or another bruteforce
+*              function if we need to parallelize bruteforce)
 *
 * Returns:     none
 * 
@@ -75,8 +76,9 @@ void bruteforce_rec(task_t* task, config_t* config, void (*check_handler)(config
 *              Pointer to application config
 *
 *              void (*check_handler)(config_t *config, task_t *task)
-*              Pointer to function that checks generated result against 
-*              target hash
+*              Pointer to function that will be run for each bruteforce result
+*              (for example, function to check hash; or another bruteforce
+*              function if we need to parallelize bruteforce)
 *
 * Returns:     none
 * 
