@@ -1,3 +1,12 @@
+/**************************************************************************
+*   Common data structures, constants etc. related to app configuration
+*
+*   File    : config.h
+*   Author  : Mikhail Mordvinkin
+*   Date    : July 24, 2018
+*
+**************************************************************************/
+
 #ifndef CONFIG_H
 #define CONFIG_H
 
@@ -5,15 +14,27 @@
 #include "struct.h"
 #include "queue.h"
 
+// Defines constants for application run mode
 typedef enum { 
+  // Displays help message
   APP_MODE_HELP, 
+
+  // Encrypts provided password using provided salt, thus generating hash
   APP_MODE_CRYPT,
+
+  // Bruteforces provided hash
   APP_MODE_DECRYPT,
+
+  // Calculate application performance
   APP_MODE_BENCHMARK
 } app_mode_t; 
 
+// Defines bruteforce algorithm - either recursive or ietrative
 typedef enum {
+  // Iterative algorithm
   BF_ITER,
+
+  // Recursive algorithm
   BF_REC,
 } bf_mode_t;
 
