@@ -64,3 +64,40 @@ void* bruteforce_task_thread_job(void* arg) {
 
   pthread_exit(EXIT_SUCCESS);
 }
+
+void single_brute(config_t *config, task_t * initial_task) {
+  debug("Started in single-thread mode\n");
+
+  config->brute_function(initial_task, config, config->check_function);
+}
+
+void multi_brute(config_t *config, task_t * initial_task) {
+  debug("Started in multi-thread mode in %d threads\n", config->num_threads);
+
+  // Init thread structures
+  pthread_attr_t attr;
+  pthread_attr_init(&attr);
+  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+  pthread_cond_init(&config->num_tasks_cv, NULL);
+
+  pthread_t threads[config->num_threads];
+  worker_args_t args[config->num_threads];
+
+  // Create bruteforce task jobs
+  for (int cpu = 0; cpu < config->num_threads; cpu++) {
+    args[cpu].config = config;
+    args[cpu].thread_number = cpu + 1;
+
+    pthread_create (&threads[cpu], &attr, bruteforce_task_thread_job, &args[cpu]);
+  }
+
+  // Run task generator
+  generate_tasks_worker(config, initial_task);
+
+  // Wait until completion of all tasks
+  pthread_mutex_lock(&config->num_tasks_mutex);
+  while (config->num_tasks > 0) {
+    pthread_cond_wait(&config->num_tasks_cv, &config->num_tasks_mutex);
+  }
+  pthread_mutex_unlock (&config->num_tasks_mutex);
+}
