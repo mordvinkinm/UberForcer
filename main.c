@@ -10,16 +10,9 @@
 #include "check.h"
 #include "config.h"
 #include "struct.h"
+#include "workers.h"
 
 #define LAST_BRUTE_CHARS (2)
-
-void add_to_queue (config_t * config, task_t * task)
-{
-  pthread_mutex_lock(&config->num_tasks_mutex);
-  ++config->num_tasks;
-  pthread_mutex_unlock(&config->num_tasks_mutex);
-  queue_push(&config -> queue, task);
-}
 
 void single_brute(config_t *config) {
   debug("Started in single-thread mode\n");
@@ -36,40 +29,10 @@ void single_brute(config_t *config) {
   config->brute_function(&initial_task, config, config->check_function);
 }
 
-void * client_worker (void * arg) {
-  worker_args_t * args = arg;
-  config_t * config = args->config;
-
-  debug("Worker #%d started\n", args->thread_number);
-
-  task_t task;  
-  for(;;) {   
-    queue_pop (&config->queue, &task);    
-    task.to = task.from;
-    task.from = 0;
-
-    config->brute_function(&task, config, config->check_function);
-
-    pthread_mutex_lock(&config->num_tasks_mutex);
-    --config->num_tasks;
-    pthread_mutex_unlock(&config->num_tasks_mutex);
-
-    if (config->num_tasks == 0)
-      pthread_cond_signal(&config->num_tasks_cv);
-  }
-
-  debug("Client worker #%d finished\n", args->thread_number);
-
-  pthread_exit(EXIT_SUCCESS);
-}
-
 void multi_brute(config_t *config) {
   debug("Started in multi-thread mode in %d threads\n", config->num_threads);
 
-  queue_init(&config->queue);
-
-  config->num_tasks = 0;      
-
+  // Init thread structures
   pthread_attr_t attr;
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
@@ -78,29 +41,19 @@ void multi_brute(config_t *config) {
   pthread_t threads[config->num_threads];
   worker_args_t args[config->num_threads];
 
+  // Create bruteforce task jobs
   for (int cpu = 0; cpu < config->num_threads; cpu++) {
     args[cpu].config = config;
     args[cpu].thread_number = cpu + 1;
 
-    pthread_create (&threads[cpu], &attr, client_worker, &args[cpu]);
+    pthread_create (&threads[cpu], &attr, bruteforce_task_thread_job, &args[cpu]);
   }
 
-  task_t initial_task = {
-    .from = 0, 
-    .to = config->length
-  };
+  // Run task generator
+  task_t initial_task = { .from = 0,  .to = config->length };
+  generate_tasks_worker(config, &initial_task);
 
-  for (int i = 0; i < initial_task.to; i++) {
-    initial_task.password[i] = config->alphabet[0];
-  }
-
-  task_t task;
-  task.from = initial_task.from + LAST_BRUTE_CHARS;
-  task.to = initial_task.to;
-  strcpy(task.password, initial_task.password);
-
-  config->brute_function (&task, config, add_to_queue);     
-
+  // Wait until completion of all tasks
   pthread_mutex_lock(&config->num_tasks_mutex);
   while (config->num_tasks > 0) {
     pthread_cond_wait(&config->num_tasks_cv, &config->num_tasks_mutex);
