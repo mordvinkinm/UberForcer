@@ -87,14 +87,12 @@ void check_task_r(config_t* config, task_t* result) {
   char iobuf[CRYPT_HASH_SIZE];
   char* hash = crypt_r(result->password, config->value, &iobuf);
   trace("Password checked: %s, hash: %s\n", result->password, hash);
+  
   if (strcmp(hash, config->value) == 0) {
-    debug("Result found, trying to acquire mutex: %s\n", result->password);
     pthread_mutex_lock(&config->result_mutex);
-    debug("Result found, mutex acquired: %s\n", result->password);
     config->result.found = true;
     strcpy(config->result.password, result->password);
     pthread_mutex_unlock(&config->result_mutex);
-    debug("Result found, mutex released: %s\n", result->password);
   }
 }
 
