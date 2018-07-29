@@ -35,7 +35,10 @@
 * 
 *************************************************************************/
 void check_task(config_t* config, task_t* result) {
-  if (strcmp(crypt(result->password, config->value), config->value) == 0) {
+  char* hash = crypt(result->password, config->value);
+  trace("Password checked: %s, hash: %s\n", result->password, hash);
+
+  if (strcmp(hash, config->value) == 0) {
     config->result.found = true;
     strcpy(config->result.password, result->password);
   }
