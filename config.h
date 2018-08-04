@@ -26,7 +26,13 @@ typedef enum {
   APP_MODE_DECRYPT,
 
   // Calculate application performance
-  APP_MODE_BENCHMARK
+  APP_MODE_BENCHMARK,
+
+  // Server, i.e. master mode
+  APP_MODE_SERVER,
+
+  // Client, i.e. worker mode
+  APP_MODE_CLIENT
 } app_mode_t; 
 
 // Defines bruteforce algorithm - either recursive or ietrative
@@ -58,8 +64,13 @@ typedef struct config_s {
   int num_threads;
 
   // Input parameters
+  // todo: rename "value" to hash and password
   char* value;
   char* salt;
+
+  // Network parameters
+  char* host;
+  unsigned short port;
 
   // Multi-threading locks
   pthread_mutex_t result_mutex;
