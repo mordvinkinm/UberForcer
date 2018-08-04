@@ -1,3 +1,18 @@
+/**************************************************************************
+*            Entry point for uberforcer application
+*
+*   File    : main.c
+*   Author  : Mikhail Mordvinkin
+*   Date    : July 24, 2018
+*
+***************************************************************************
+*   Entry point for uberforcer app:
+*   call method to parse app argument;
+*   constructs initial tasks and data structures;
+*   run appropriate routines depending on selected application mode and parameters.
+*   
+**************************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,10 +22,12 @@
 #include "lib/crypt3.h"
 #include "bruteforce.h"
 #include "parse_args.h"
+#include "network.h"
 #include "check.h"
 #include "config.h"
 #include "struct.h"
 #include "workers.h"
+#include "workers_network.h"
 
 #define LAST_BRUTE_CHARS (2)
 
@@ -31,19 +48,34 @@ void bruteforce(config_t *config) {
   }
 }
 
+void init_network () {
+  #ifdef _WIN32
+    WSADATA wsaData; 
+    WSAStartup(0x202, &wsaData);
+
+    debug("Called WSAStartup to init network in Windows environment\n");
+  #elif _WIN64
+    WSADATA wsaData; 
+    WSAStartup(0x202, &wsaData);
+    debug("Called WSAStartup to init network in Windows environment\n");
+  #endif
+}
+
 void help_routine() {
   printf("Available commands:\n\n");
-  printf("uberforcer help\t\t\t\tshow help file\n");
-  printf("uberforcer crypt <password> <salt>\tcall crypt function\n");
-  printf("uberforcer decrypt <hash> <args>\tcall decrypt function\n");
-  printf("uberforcer benchmark <args>\t\tperform benchmarking\n");
+  printf("uberforcer help\t\t\t\t\tshow help file\n");
+  printf("uberforcer crypt <password> <salt>\t\tencrypt provided <password>, using provided <salt>\n");
+  printf("uberforcer decrypt <hash> <args>\t\tbruteforce provided <hash>, using additional arguments <args> [optional]. available arguments: -r, -i, -a, -l, -t\n");
+  printf("uberforcer benchmark <args>\t\t\tperform benchmarking, using bruteforcing arguments <args> [optional]. available arguments: -r, -i, -a, -l, -t\n");
+  printf("uberforcer server <port> <args>\t\t\tstart bruteforcing server on the provided port, using bruteforcing arguments <args> [optional]. available arguments: -r, -i, -a, -l\n");
+  printf("uberforcer client <host> <port> <args>\t\tstart bruteforcing client to connect to server on <host>:<port>, using bruteforcing arguments <args> [optional]. available arguments: -r, -i, -t\n");
   printf("\n");
-  printf("Available arguments:\n");
-  printf("-r or --recursive\t\t\tuse recursive bruteforcing algorithm; mutually exclusive with --iterative\n");
-  printf("-i or --iterative\t\t\t[default] use iterative bruteforcing algorithm; mutually exclusive with --recursive\n");
-  printf("-a <value> or --alphabet <value>\tavailable alphabet\n");
-  printf("-l <value> or --length <value>\t\tpresumed length of password\n");
-  printf("-t <value> or --threads <value>\t\tNumber of threads for multithreading bruteforce\n");
+  printf("Available <args> arguments:\n");
+  printf("-r or --recursive\t\t\t\tuse recursive bruteforcing algorithm; mutually exclusive with --iterative\n");
+  printf("-i or --iterative\t\t\t\t[default] use iterative bruteforcing algorithm; mutually exclusive with --recursive\n");
+  printf("-a <value> or --alphabet <value>\t\tavailable alphabet; default: [A-Za-z0-9]\n");
+  printf("-l <value> or --length <value>\t\t\tpresumed length of password; default: 4\n");
+  printf("-t <value> or --threads <value>\t\t\tNumber of threads for multithreading bruteforce; default: 1\n");
 }
 
 void encrypt_routine(config_t *config) {
@@ -91,6 +123,22 @@ void benchmark_routine(config_t *config) {
   printf("Performance: %.2f hashes / sec", perf);
 }
 
+void server_routine(config_t *config) {
+  debug("Started bruteforcing server\n");
+
+  init_network();
+
+  server_listener(config);
+}
+
+void client_routine(config_t *config) {
+  debug("Started bruteforcing client\n");
+
+  init_network();
+
+  client_job(config);
+}
+
 int main(int argc, char *argv[]) {
   config_t config = {
     .brute_function = bruteforce_iter,
@@ -102,7 +150,8 @@ int main(int argc, char *argv[]) {
     // Default parameters
     .alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890",
     .length = 4,
-    .num_threads = 1
+    .num_threads = 1,
+    .port = 7534
   };
 
   if (EXIT_SUCCESS == parse_args(argc, argv, &config)) {
@@ -121,6 +170,14 @@ int main(int argc, char *argv[]) {
 
       case APP_MODE_BENCHMARK:
         benchmark_routine(&config);
+        break;
+
+      case APP_MODE_SERVER:
+        server_routine(&config);
+        break;
+
+      case APP_MODE_CLIENT:
+        client_routine(&config);
         break;
 
       default:
