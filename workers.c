@@ -15,6 +15,7 @@ void add_to_queue(config_t* config, task_t* task) {
   trace("Task added to the queue: [from: %d, to: %d, password: %s]\n", task->from, task->to, task->password);
 }
 
+// todo: rename to generate_tasks
 void generate_tasks_worker(config_t* config, task_t* initial_task) {
   debug("Task generator started\n");
 
@@ -34,6 +35,7 @@ void generate_tasks_worker(config_t* config, task_t* initial_task) {
   debug("Task generator finished execution\n");
 }
 
+// todo: rename to "bruteforce_task"
 void bruteforce_task_worker(config_t* config) {
   task_t task;
   for (;;) {
@@ -52,6 +54,7 @@ void bruteforce_task_worker(config_t* config) {
   }
 }
 
+// todo: rename to "bruteforce_task_job"
 void* bruteforce_task_thread_job(void* arg) {
   worker_args_t* args = arg;
   config_t* config = args->config;
