@@ -27,7 +27,7 @@ uberforcer help                                 show help file
 uberforcer crypt <password> <salt>              encrypt provided <password>, using provided <salt>
 uberforcer decrypt <hash> <args>                bruteforce provided <hash>, using additional arguments <args> [optional]. available arguments: -r, -i, -a, -l, -t
 uberforcer benchmark <args>                     perform benchmarking, using bruteforcing arguments <args> [optional]. available arguments: -r, -i, -a, -l, -t
-uberforcer server <port> <args>                 start bruteforcing server on the provided port, using bruteforcing arguments <args> [optional]. available arguments: -r, -i, -a, -l
+uberforcer server <hash> <port> <args>          start bruteforcing server on the provided port, to bruteforce <hash>, using bruteforcing arguments <args> [optional]. available arguments: -r, -i, -a, -l
 uberforcer client <host> <port> <args>          start bruteforcing client to connect to server on <host>:<port>, using bruteforcing arguments <args> [optional]. available arguments: -r, -i, -t
 
 Available <args> arguments:

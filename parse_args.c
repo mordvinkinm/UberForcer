@@ -230,15 +230,16 @@ int parse_args(int argc, char *argv[], config_t *config) {
   }
 
   if (strcmp("server", mode) == 0) {
-    if (true != validate_integer(argv[2], 1024, 65535)){
+    if (true != validate_integer(argv[3], 1024, 65535)){
       fprintf(stderr, "Invalid value for <port>: should be numeric between 1024 and 65535 (inclusive)\n");
       return EXIT_FAILURE;
     }
 
     config->app_mode = APP_MODE_SERVER;
-    config->port = (unsigned short)atoi(argv[2]);
+    config->value = argv[2];
+    config->port = (unsigned short)atoi(argv[3]);
 
-    return parse_run_params(3, arg_cnt, argv, config);
+    return parse_run_params(4, arg_cnt, argv, config);
   }
 
   if (strcmp("client", mode) == 0) {

@@ -67,7 +67,7 @@ void help_routine() {
   printf("uberforcer crypt <password> <salt>\t\tencrypt provided <password>, using provided <salt>\n");
   printf("uberforcer decrypt <hash> <args>\t\tbruteforce provided <hash>, using additional arguments <args> [optional]. available arguments: -r, -i, -a, -l, -t\n");
   printf("uberforcer benchmark <args>\t\t\tperform benchmarking, using bruteforcing arguments <args> [optional]. available arguments: -r, -i, -a, -l, -t\n");
-  printf("uberforcer server <port> <args>\t\t\tstart bruteforcing server on the provided port, using bruteforcing arguments <args> [optional]. available arguments: -r, -i, -a, -l\n");
+  printf("uberforcer server <hash> <port> <args>\t\t\tstart bruteforcing server on the provided port, to bruteforce <hash>, using bruteforcing arguments <args> [optional]. available arguments: -r, -i, -a, -l\n");
   printf("uberforcer client <host> <port> <args>\t\tstart bruteforcing client to connect to server on <host>:<port>, using bruteforcing arguments <args> [optional]. available arguments: -r, -i, -t\n");
   printf("\n");
   printf("Available <args> arguments:\n");
