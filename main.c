@@ -48,17 +48,35 @@ void bruteforce(config_t *config) {
   }
 }
 
-void init_network () {
-  #ifdef _WIN32
-    WSADATA wsaData; 
-    WSAStartup(0x202, &wsaData);
+void* generate_server_tasks_thread_job(void* raw_args) {
+    worker_args_t * args = raw_args;
+    config_t * config = args->config;
 
-    debug("Called WSAStartup to init network in Windows environment\n");
-  #elif _WIN64
-    WSADATA wsaData; 
-    WSAStartup(0x202, &wsaData);
-    debug("Called WSAStartup to init network in Windows environment\n");
-  #endif
+    task_t initial_task = {
+    .from = 0, 
+    .to = config->length
+  };
+
+  for (int i = 0; i < initial_task.to; i++) {
+    initial_task.password[i] = config->alphabet[0];
+  }
+
+  generate_tasks_worker(config, &initial_task);
+}
+
+void generate_server_tasks(config_t * config){
+  pthread_attr_t attr;
+  pthread_attr_init(&attr);
+  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+  pthread_cond_init(&config->num_tasks_cv, NULL);
+
+  pthread_t thread;
+  worker_args_t args = {
+    .config = config,
+    .thread_number = 1000
+  };
+
+  pthread_create (&thread, &attr, generate_server_tasks_thread_job, &args);
 }
 
 void help_routine() {
@@ -128,6 +146,7 @@ void server_routine(config_t *config) {
 
   init_network();
 
+  generate_server_tasks(config);
   server_listener(config);
 }
 
