@@ -17,7 +17,7 @@ void add_to_queue(config_t* config, task_t* task) {
 
 // todo: rename to generate_tasks
 void generate_tasks_worker(config_t* config, task_t* initial_task) {
-  debug("Task generator started\n");
+  debug("Task generator started with parameters\n");
 
   queue_init(&config->queue);
 
@@ -69,13 +69,13 @@ void* bruteforce_task_thread_job(void* arg) {
 }
 
 void single_brute(config_t *config, task_t * initial_task) {
-  debug("Started in single-thread mode\n");
+  debug("Started in single-thread mode: password %s, from: %d, to: %d\n", initial_task->password, initial_task->from, initial_task->to);
 
   config->brute_function(initial_task, config, config->check_function);
 }
 
 void multi_brute(config_t *config, task_t * initial_task) {
-  debug("Started in multi-thread mode in %d threads\n", config->num_threads);
+  debug("Started in multi-thread mode in %d threads: password %s, from: %d, to: %d\n", config->num_threads, initial_task->password, initial_task->from, initial_task->to);
 
   // Init thread structures
   pthread_attr_t attr;
