@@ -90,7 +90,10 @@ void * server_task_manager_job (void * raw_args) {
   return (NULL);
 }
 
-void server_listener(config_t * config) {
+void* server_listener_thread_job(void * raw_args) {
+  worker_args_t * args = raw_args;
+  config_t * config = args->config;
+
   debug("Started server listener on port %d\n", config->port);
 
   struct sockaddr_in serv_addr, client_addr;
@@ -98,7 +101,7 @@ void server_listener(config_t * config) {
   int sock = socket(AF_INET, SOCK_STREAM, 0);
   if (sock < 0) {
     fprintf(stderr, "Error opening socket: %d (%s)\n", errno, strerror(errno));
-    return;
+    return NULL;
   }
 
   serv_addr.sin_family = AF_INET;
@@ -107,7 +110,7 @@ void server_listener(config_t * config) {
 
   if (bind (sock, (struct sockaddr *) &serv_addr, sizeof (serv_addr))){
       fprintf(stderr, "Error binding socket: %d (%s)\n", errno, strerror(errno));
-      return;
+      return NULL;
   }
 
   listen (sock, 10);
@@ -131,6 +134,21 @@ void server_listener(config_t * config) {
 
     pthread_create (&id, &attr, server_task_manager_job, &args);    
   }
+}
+
+void server_listener(config_t * config) {
+  pthread_attr_t attr;
+  pthread_attr_init(&attr);
+  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+  pthread_cond_init(&config->num_tasks_cv, NULL);
+
+  pthread_t thread;
+  worker_args_t args = {
+    .config = config,
+    .thread_number = 1000
+  };
+
+  pthread_create (&thread, &attr, server_listener_thread_job, &args);
 }
 
 void client_job (config_t * config){

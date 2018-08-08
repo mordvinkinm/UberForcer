@@ -48,11 +48,8 @@ void bruteforce(config_t *config) {
   }
 }
 
-void* generate_server_tasks_thread_job(void* raw_args) {
-    worker_args_t * args = raw_args;
-    config_t * config = args->config;
-
-    task_t initial_task = {
+void generate_server_tasks(config_t * config) {
+  task_t initial_task = {
     .from = 0, 
     .to = config->length
   };
@@ -62,21 +59,6 @@ void* generate_server_tasks_thread_job(void* raw_args) {
   }
 
   generate_tasks_worker(config, &initial_task);
-}
-
-void generate_server_tasks(config_t * config){
-  pthread_attr_t attr;
-  pthread_attr_init(&attr);
-  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-  pthread_cond_init(&config->num_tasks_cv, NULL);
-
-  pthread_t thread;
-  worker_args_t args = {
-    .config = config,
-    .thread_number = 1000
-  };
-
-  pthread_create (&thread, &attr, generate_server_tasks_thread_job, &args);
 }
 
 void help_routine() {
@@ -145,9 +127,15 @@ void server_routine(config_t *config) {
   debug("Started bruteforcing server\n");
 
   init_network();
-
-  generate_server_tasks(config);
+  
   server_listener(config);
+  generate_server_tasks(config);
+
+  if (config->result.found != false) {
+    printf("Result found: %s\n", config->result.password);
+  } else {
+    printf("Result not found\n");
+  }
 }
 
 void client_routine(config_t *config) {
