@@ -33,16 +33,22 @@
 * Function:    validate_integer
 *
 * Description: Specific validator to ensure that provided char array
-*              can be parsed as integer from 1 to 99999999
+*              can be parsed as integer and between minValue and maxValue
 *              
 * Inputs:      char *s
 *              Pointer to a char array to test
+*
+*              int minValue
+*              Min value (inclusive) of an integer
+*
+*              int maxValue
+*              Max value (inclusive) of an integer
 *
 * Returns:     bool (short int alias)
 *              true or false
 * 
 *************************************************************************/
-bool validate_integer(char* s) {
+bool validate_integer(char* s, int minValue, int maxValue) {
   int valueLen = strlen(s);
   if (valueLen < 1 || valueLen > 8){
     return false;
@@ -54,7 +60,9 @@ bool validate_integer(char* s) {
     }
   }
 
-  return true;
+  int value = atoi(s);
+
+  return value >= minValue && value <= maxValue ? true : false;
 }
 
 
@@ -99,8 +107,8 @@ int parse_run_params(int start_arg_ind, int end_arg_ind, char *argv[], config_t 
 
     if (strcmp("-t", argv[i]) == 0 || strcmp("--threads", argv[i]) == 0) {
       if (i + 1 <= end_arg_ind) {
-        if (true != validate_integer(argv[i + 1])) {
-          fprintf(stderr, "Threads key specified, but value is invalid. It should be numeric between 1 and 128");
+        if (true != validate_integer(argv[i + 1], 1, 128)) {
+          fprintf(stderr, "Threads key specified, but value is invalid. It should be numeric between 1 and 128 (inclusive)");
           return EXIT_FAILURE;
         }
 
@@ -121,8 +129,8 @@ int parse_run_params(int start_arg_ind, int end_arg_ind, char *argv[], config_t 
 
     if (strcmp("-l", argv[i]) == 0 || strcmp("--length", argv[i]) == 0) {
       if (i + 1 <= end_arg_ind) {
-        if (true != validate_integer(argv[i + 1])) {
-          fprintf(stderr, "Length key specified, but value is invalid. It should be numeric between 1 and 99 999 999.");
+        if (true != validate_integer(argv[i + 1], 1, 65535)) {
+          fprintf(stderr, "Length key specified, but value is invalid. It should be numeric between 1 and 65535.");
           return EXIT_FAILURE;
         }
 
@@ -219,6 +227,32 @@ int parse_args(int argc, char *argv[], config_t *config) {
     } else {
       return EXIT_FAILURE;
     }
+  }
+
+  if (strcmp("server", mode) == 0) {
+    if (true != validate_integer(argv[3], 1024, 65535)){
+      fprintf(stderr, "Invalid value for <port>: should be numeric between 1024 and 65535 (inclusive)\n");
+      return EXIT_FAILURE;
+    }
+
+    config->app_mode = APP_MODE_SERVER;
+    config->value = argv[2];
+    config->port = (unsigned short)atoi(argv[3]);
+
+    return parse_run_params(4, arg_cnt, argv, config);
+  }
+
+  if (strcmp("client", mode) == 0) {
+    if (true != validate_integer(argv[3], 1024, 65535)){
+      fprintf(stderr, "Invalid value for <port>: should be numeric between 1024 and 65535 (inclusive)\n");
+      return EXIT_FAILURE;
+    }
+
+    config->app_mode = APP_MODE_CLIENT;
+    config->host = argv[2];
+    config->port = (unsigned short)atoi(argv[3]);
+
+    return parse_run_params(4, arg_cnt, argv, config);
   }
 
   fprintf(stderr, "Command not recognized: %s\n", mode);
