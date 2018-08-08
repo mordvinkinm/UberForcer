@@ -173,7 +173,7 @@ void client_job (config_t * config){
 
   sscanf (buf, MSG_SEND_JOB, task.password, config->value, config->alphabet, &task.from, &task.to);
 
-  trace("Password: %s, Hash: %s, Alphabet: %s, from: %d, to: %d", task.password, config->value, config->alphabet, task.from, task.to);
+  trace("Password: %s, Hash: %s, Alphabet: %s, from: %d, to: %d\n", task.password, config->value, config->alphabet, task.from, task.to);
 
   if (config->num_threads > 1) {
     multi_brute(config, &task);

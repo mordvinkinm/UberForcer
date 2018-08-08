@@ -158,7 +158,9 @@ void client_routine(config_t *config) {
   config->value = malloc(sizeof(char) * 255);
   config->alphabet = malloc(sizeof(char) * 255);
 
-  client_job(config);
+  for (;;){
+    client_job(config);
+  }
 
   free(config->value);
   free(config->alphabet);
