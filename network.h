@@ -2,7 +2,8 @@
 *            Cross-platform encapsulation of requried network operation
 *
 *   File    : network.h
-*   Purpose : Encapsulates definitions for cross-platform compilation
+*   Purpose : Encapsulates definitions for cross-platform compilation of
+*             network operations
 *   Author  : Mikhail Mordvinkin
 *   Date    : July 24, 2018
 *
@@ -37,5 +38,13 @@ typedef struct client_listener_args_s {
     int descriptor;
     config_t * config;
 } client_listener_args_t;
+
+/**************************************************************************
+* Function:    init_network
+*
+* Description: Initializes network operation, making appropriate system calls
+*              
+*************************************************************************/
+void init_network();
 
 #endif /* NETWORK_H */
