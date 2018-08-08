@@ -80,7 +80,7 @@ typedef struct config_s {
   
 typedef struct worker_args_s {
   config_t* config;
-  int thread_number;
+  int thread_number;  // todo: chagne to thread_name
 } worker_args_t;
 
 #endif /* CONFIG_H */
