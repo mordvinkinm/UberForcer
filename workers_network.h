@@ -3,7 +3,9 @@
 
 #include "config.h"
 
-void server_listener();
+#define BUF_SIZE 512
+
+void server_listener(config_t * config);
 
 void client_job(config_t * config);
 

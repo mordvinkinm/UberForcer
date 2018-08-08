@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "workers_network.h"
 #include "workers.h"
@@ -8,34 +9,66 @@
 #include "protocol.h"
 #include "network.h"
 
-void communicate_client(config_t * config, task_t * task, int sock) {
-  int msglen;
-  if (read (sock, &msglen, sizeof(msglen))) 
-      fprintf (stderr, "Error reading config\n");
+void re_add_task(config_t* config, task_t* task) {
+  pthread_mutex_lock(&config->num_tasks_mutex);
+  ++config->num_tasks;
+  pthread_mutex_unlock(&config->num_tasks_mutex);
+  queue_push(&config->queue, task);
 
-  char * buf = malloc(sizeof(char) * msglen);
+  trace("Task added to the queue: [from: %d, to: %d, password: %s]\n", task->from, task->to, task->password);
+}
+
+int communicate_client(config_t * config, task_t * task, int sock, result_t * result) {
+  trace("Preparing sending task to client: password %s, from: %d, to: %d\n", task->password, task->from, task->to);
+
+  char * buf = malloc(sizeof(char) * BUF_SIZE);
+  memset(buf, 0, BUF_SIZE);
+
   sprintf(buf, MSG_SEND_JOB, task->password, config->value, config->alphabet, task->from, task->to);
-  write(sock, buf, msglen);
+
+  if (send(sock, buf, strlen(buf), 0) < 0) {
+    fprintf(stderr, "Error writing to socket: %s\n", strerror(errno));
+    return EXIT_FAILURE;
+  }
+
+  trace("Message sent to client:\n%s\n", buf);
     
-  if (read (sock, &msglen, sizeof(msglen)))
-    fprintf(stderr, "Error reading config\n");
+  memset(buf, 0, BUF_SIZE);
 
-  read(sock, buf, msglen);
-  char * password = malloc(sizeof(char) * msglen);
-  int found;
-  sscanf(buf, MT_REPORT_RESULT, password, &found);
+  if (recv(sock, buf, BUF_SIZE, 0) < 0) {
+    fprintf(stderr, "Error reading from socket: %s\n", strerror(errno));
+    return EXIT_FAILURE;
+  }
 
-  trace("Result: %s, Found: %d", paessword, found);
+  trace("Message received from client:\n%s\n", buf);
+
+  sscanf(buf, MSG_REPORT_RESULT, result->password, &result->found);
+
+  free(buf);
+
+  return EXIT_SUCCESS;
 }
 
 void server_task_manager(int sock, config_t * config){
   task_t task;
+  result_t result;
+  
   for (;;) {
     queue_pop(&config->queue, &task);
     task.to = task.from;
     task.from = 0;
 
-    communicate_client(config, &task, sock);
+    if (EXIT_SUCCESS != communicate_client(config, &task, sock, &result)) {
+      fprintf(stderr, "Communication failed. Task re-added to the queue\n");
+      re_add_task(config, &task);
+    }
+
+    if (result.found == true) {
+      printf("Result found: %s\n", result.password);
+
+      strcpy(config->result.password, result.password);
+      config->result.found = result.found;
+    }
 
     pthread_mutex_lock(&config->num_tasks_mutex);
     --config->num_tasks;
@@ -111,36 +144,50 @@ void client_job (config_t * config){
 
   printf ("Establish connect to %s\n", config->host);
 
-  int sock = socket (AF_INET, SOCK_STREAM, 0);
-  if (sock < 0){
-    fprintf(stderr, "Error creating socket\n");
+  int sock = socket(AF_INET, SOCK_STREAM, 0);
+  if (sock < 0) {
+    fprintf(stderr, "Error creating socket: %s\n", strerror(errno));
     return;
   }
 
-  if (connect (sock, (struct sockaddr *) &serv_addr, sizeof (serv_addr)) < 0) {
-    fprintf (stderr, "Error connecting to %s\n", config->host);
+  if (connect(sock, (struct sockaddr *) &serv_addr, sizeof (serv_addr)) < 0) {
+    fprintf(stderr, "Error connecting to %s\n", config->host);
     return;
   }
 
   printf ("Connected to %s\n", config->host);
 
-  // Reading config from server
-  int msglen;
-  if (read (sock, &msglen, sizeof(msglen))) {
-      fprintf (stderr, "Error reading config\n");
-      return;
+  // TASK PASSWORD
+  char * buf = malloc(sizeof(char) * BUF_SIZE);
+  memset(buf, 0, BUF_SIZE);
+  
+  if (recv(sock, buf, BUF_SIZE, 0) < 0) {
+    fprintf(stderr, "Error reading from socket: %s\n", strerror(errno));
+    return;
   }
 
-  // TASK PASSWORD
-  char * buf = malloc(sizeof(char) * msglen);
-  read (sock, buf, msglen);
+  trace("Message received from server:\n%s\n", buf);
 
   task_t task;
-  sscanf (buf, MSG_SEND_JOB, &task.password, config->value, config->alphabet, &task.from, &task.to);
+  memset(task.password, 0, sizeof(task.password));
+
+  sscanf (buf, MSG_SEND_JOB, task.password, config->value, config->alphabet, &task.from, &task.to);
+
+  trace("Password: %s, Hash: %s, Alphabet: %s, from: %d, to: %d", task.password, config->value, config->alphabet, task.from, task.to);
 
   if (config->num_threads > 1) {
     multi_brute(config, &task);
   } else {
     single_brute(config, &task);
   }
+
+  memset(buf, 0, BUF_SIZE);
+  sprintf(buf, MSG_REPORT_RESULT, config->result.password, config->result.found);
+
+  if (send(sock, buf, strlen(buf), 0) < 0){
+    fprintf(stderr, "Error writing to socket: %s\n", strerror(errno));
+    return;
+  }
+
+  trace("Message sent to server:\n%s\n", buf);
 }
