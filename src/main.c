@@ -19,7 +19,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 
-#include "lib/crypt3.h"
+#include "../lib/crypt3.h"
 #include "bruteforce.h"
 #include "parse_args.h"
 #include "network.h"
