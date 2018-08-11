@@ -15,7 +15,7 @@
 
 #include <string.h>
 
-#include "lib/crypt3.h"
+#include "../lib/crypt3.h"
 #include "config.h"
 #include "common.h"
 
