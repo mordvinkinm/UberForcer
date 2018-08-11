@@ -34,9 +34,14 @@
     #error "Unknown target platform"
 #endif
 
+/**************************************************************************
+*
+* Description: Structure to pass arguments into a thread worker
+*              
+*************************************************************************/
 typedef struct client_listener_args_s {
-    int descriptor;
     config_t * config;
+    int descriptor;
 } client_listener_args_t;
 
 /**************************************************************************
