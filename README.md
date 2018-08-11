@@ -9,11 +9,11 @@ Attempt to write a super-efficient bruteforcing tool for learning purposes on pu
 3. Client-server task, i.e. master & workers
 
 # How to build
-Windows:
-gcc -o uberforcer.exe -O2 main.c lib/crypt3.h lib/crypt3.c common.h config.h network.h check.c check.h bruteforce.c bruteforce.h parse_args.h parse_args.c struct.h queue.h queue.c workers.h workers.c workers_network.h workers_network.c -lpthread -lws2_32
+## Windows (using mingw make)
+mingw32-make uberforcer_windows
 
-Linux:
-gcc -o uberforcer.exe -O2 main.c lib/crypt3.h lib/crypt3.c common.h config.h network.h check.c check.h bruteforce.c bruteforce.h parse_args.h parse_args.c struct.h queue.h queue.c workers.h workers.c workers_network.h workers_network.c -lpthread
+## Windows (without make)
+gcc -o uberforcer.exe -O2 main.c lib/crypt3.h lib/crypt3.c common.h config.h network.h check.c check.h bruteforce.c bruteforce.h parse_args.h parse_args.c struct.h queue.h queue.c workers.h workers.c workers_network.h workers_network.c -lpthread -lws2_32
 
 Use -DDEBUG=1 key to build app with verbose info
 Use -DDEBUG=2 key to build app with trace info
@@ -38,4 +38,4 @@ Available <args> arguments:
 -t <value> or --threads <value>                 Number of threads for multithreading bruteforce; default: 1
 
 # Copyright
-Thanks to Michael Dipperstein for original version of crypt code
+Thanks to Michael Dipperstein for original version of crypt3 code
