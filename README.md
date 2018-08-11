@@ -10,14 +10,14 @@ Attempt to write a super-efficient bruteforcing tool for learning purposes on pu
 
 # How to build
 ## Windows (using mingw make)
-```
+<pre>
 mingw32-make uberforcer_windows
-```
+</pre>
 
 ## Windows (without make)
-```
+<pre>
 gcc -o uberforcer.exe -O2 lib/crypt3.h lib/crypt3.c src/main.c src/common.h src/config.h src/check.c src/check.h src/bruteforce.c src/bruteforce.h src/parse_args.h src/parse_args.c src/struct.h src/queue.h src/queue.c src/workers.h src/workers.c src/network.h src/network.c src/workers_network.h src/workers_network.c -lpthread -lws2_32
-```
+</pre>
 
 - Use -DDEBUG=1 key to build app with verbose info
 - Use -DDEBUG=2 key to build app with trace info
