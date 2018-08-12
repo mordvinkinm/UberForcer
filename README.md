@@ -14,6 +14,8 @@ Attempt to write a super-efficient bruteforcing tool for learning purposes on pu
 mingw32-make uberforcer_windows
 </pre>
 
+- Use CLAGS="..." to pass C compilation flags (for example, CFLAGS="-O2")
+- Use OUT="..." to specify output path (for example, OUT="out/uberforcer.exe")
 - Use DEBUG=1 make key to build app with verbose info
 - Use DEBUG=2 make key to build app with trace info
 
