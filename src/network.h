@@ -52,4 +52,20 @@ typedef struct client_listener_args_s {
  *************************************************************************/
 void init_network();
 
+/**************************************************************************
+ * Function:    connect_to_server
+ *
+ * Description: Connects client to a bruteforcing server.
+ *
+ * Inputs:      char *host
+ *              Pointer to bruteforcing server host
+ * 
+ *              unsigned short port
+ *              Port number. Should be between 1024 and 65535 (inclusive)
+ *
+ * Returns:     socket id or -1 if connection failed
+ *
+ *************************************************************************/
+int connect_to_server(config_t *config, struct sockaddr_in *serv_addr);
+
 #endif /* NETWORK_H */

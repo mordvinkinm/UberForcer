@@ -163,29 +163,13 @@ void server_listener(config_t * config) {
   pthread_create (&thread, &attr, server_listener_thread_job, &args);
 }
 
-void client_job (config_t * config){
+int client_job (config_t * config){
   struct sockaddr_in serv_addr;
-  serv_addr.sin_family = AF_INET;
-  serv_addr.sin_port = htons(config->port);
-
-  struct hostent * server;
-  server = gethostbyname (config->host);
-  memmove ((char *) &serv_addr.sin_addr.s_addr, (char *) server->h_addr, server->h_length);
-
-  debug ("Establish connect to %s\n", config->host);
-
-  int sock = socket(AF_INET, SOCK_STREAM, 0);
+  
+  int sock = connect_to_server(config->host, config->port, &serv_addr);
   if (sock < 0) {
-    fprintf(stderr, "Error creating socket: %s\n", strerror(errno));
-    return;
+    return EXIT_FAILURE;
   }
-
-  if (connect(sock, (struct sockaddr *) &serv_addr, sizeof (serv_addr)) < 0) {
-    fprintf(stderr, "Error connecting to %s\n", config->host);
-    return;
-  }
-
-  debug ("Connected to %s\n", config->host);
 
   for (;;) {
     // TASK PASSWORD
@@ -194,7 +178,7 @@ void client_job (config_t * config){
     
     if (recv(sock, buf, BUF_SIZE, 0) < 0) {
       fprintf(stderr, "Error reading from socket: %s\n", strerror(errno));
-      return;
+      return EXIT_FAILURE;
     }
 
     trace("Message received from server:\n%s\n", buf);
@@ -217,9 +201,11 @@ void client_job (config_t * config){
 
     if (send(sock, buf, strlen(buf), 0) < 0){
       fprintf(stderr, "Error writing to socket: %s\n", strerror(errno));
-      return;
+      return EXIT_FAILURE;
     }
 
     trace("Message sent to server:\n%s\n", buf);
   }
+
+  return EXIT_SUCCESS;
 }
