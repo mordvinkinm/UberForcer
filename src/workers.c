@@ -6,6 +6,20 @@
 #include "struct.h"
 #include "workers.h"
 
+/**************************************************************************
+ * Function:    add_to_queue
+ *
+ * Description: adds a task to the queue
+ *
+ * Inputs:      config_t *config
+ *              Pointer to application config
+ *
+ *              task_t *task
+ *              Pointer to task that will be added to the queue
+ *
+ * Returns:     none
+ *
+ *************************************************************************/
 void add_to_queue(config_t* config, task_t* task) {
   pthread_mutex_lock(&config->num_tasks_mutex);
   ++config->num_tasks;
@@ -15,8 +29,26 @@ void add_to_queue(config_t* config, task_t* task) {
   trace("Task added to the queue: [from: %d, to: %d, password: %s]\n", task->from, task->to, task->password);
 }
 
-// todo: rename to generate_tasks
-void generate_tasks_worker(config_t* config, task_t* initial_task) {
+/**************************************************************************
+ * Function:    generate_tasks
+ *
+ * Description: function that generates thread tasks based on provided
+ *              base task
+ *
+ * Inputs:      config_t* config
+ *              Pointer to application config
+ *
+ *              task_t* initial_task
+ *              Pointer to "base" task:
+ *              It might be different in case of one-machine mode
+ *              (i.e. when we need to bruteforce the whole passwords set) and
+ *              in master-worker mode (i.e. when partiaular client needs
+ *              to bruteforce subset of passwords set)
+ *
+ * Returns:     none
+ *
+ *************************************************************************/
+void generate_tasks(config_t* config, task_t* initial_task) {
   debug("Task generator started with parameters\n");
 
   for (int i = 0; i < initial_task->to; i++) {
@@ -31,6 +63,21 @@ void generate_tasks_worker(config_t* config, task_t* initial_task) {
   debug("Task generator finished execution\n");
 }
 
+/**************************************************************************
+ * Function:    bruteforce_task_job
+ *
+ * Description: Job for one thread, that extracts tasks from the queue and
+ *              bruteforces this task.
+ *
+ *              Thread-safe.
+ *
+ * Inputs:      void* arg [actual type is worker_args_t*]
+ *              parameters passed to a thread worker - pointer to config
+ *              and number / name of thread
+ *
+ * Returns:     void*
+ *
+ *************************************************************************/
 void* bruteforce_task_job(void* arg) {
   // unwrap thread job arguments
   worker_args_t* args = arg;
@@ -59,13 +106,48 @@ void* bruteforce_task_job(void* arg) {
   pthread_exit(EXIT_SUCCESS);
 }
 
-void single_brute(config_t *config, task_t * initial_task) {
+/**************************************************************************
+ * Function:    single_brute
+ *
+ * Description: highlevel worker that bruteforces provided task in a
+ *              single-threaded mode
+ *
+ * Inputs:      config_t* config
+ *              Pointer to application config
+ *
+ *              task_t* initial_task
+ *              Pointer to task needs to be bruteforced
+ *
+ * Returns:     none
+ *
+ *************************************************************************/
+void single_brute(config_t* config, task_t* initial_task) {
   debug("Started in single-thread mode: password %s, from: %d, to: %d\n", initial_task->password, initial_task->from, initial_task->to);
 
   config->brute_function(initial_task, config, config->check_function);
 }
 
-void multi_brute(config_t *config, task_t * initial_task) {
+/**************************************************************************
+ * Function:    multi_brute
+ *
+ * Description: highlevel worker that bruteforces provided task in a
+ *              multi-threaded mode.
+ *
+ *              - Starts tasks generator, which produces tasks and puts them
+ *              into the queue;
+ *              - Starts N bruteforcing jobs, which retrieve tasks from the
+ *              queue and bruteforce each task.
+ *
+ * Inputs:      config_t* config
+ *              Pointer to application config
+ *
+ *              task_t* initial_task
+ *              Pointer to task needs to be bruteforced
+ *
+ * Returns:     none
+ *
+ *************************************************************************/
+void multi_brute(config_t* config, task_t* initial_task) {
   debug("Started in multi-thread mode in %d threads: password %s, from: %d, to: %d\n", config->num_threads, initial_task->password, initial_task->from, initial_task->to);
 
   // init thread structures
@@ -86,16 +168,16 @@ void multi_brute(config_t *config, task_t * initial_task) {
     args[cpu].config = config;
     args[cpu].thread_number = cpu + 1;
 
-    pthread_create (&threads[cpu], &attr, bruteforce_task_job, &args[cpu]);
+    pthread_create(&threads[cpu], &attr, bruteforce_task_job, &args[cpu]);
   }
 
   // run task generator
-  generate_tasks_worker(config, initial_task);
+  generate_tasks(config, initial_task);
 
   // Wait until completion of all tasks
   pthread_mutex_lock(&config->num_tasks_mutex);
   while (config->num_tasks > 0) {
     pthread_cond_wait(&config->num_tasks_cv, &config->num_tasks_mutex);
   }
-  pthread_mutex_unlock (&config->num_tasks_mutex);
+  pthread_mutex_unlock(&config->num_tasks_mutex);
 }
