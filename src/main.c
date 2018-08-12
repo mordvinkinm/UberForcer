@@ -61,6 +61,14 @@ void generate_server_tasks(config_t * config) {
   generate_tasks_worker(config, &initial_task);
 }
 
+/**************************************************************************
+* Function:    help_routine
+*
+* Description: One of available application modes - show help message
+*
+* Returns:     none
+* 
+*************************************************************************/
 void help_routine() {
   printf("Available commands:\n\n");
   printf("uberforcer help\t\t\t\t\tshow help file\n");
@@ -78,6 +86,18 @@ void help_routine() {
   printf("-t <value> or --threads <value>\t\t\tNumber of threads for multithreading bruteforce; default: 1\n");
 }
 
+/**************************************************************************
+* Function:    encrypt_routine
+*
+* Description: One of available application modes - encrypts a password
+*              using provided salt
+*
+* Inputs:      config_t *config
+*              Pointer to application config
+*
+* Returns:     none
+* 
+*************************************************************************/
 void encrypt_routine(config_t *config) {
   debug("Started encryption with: password=%s, salt=%s\n", config->password, config->salt);
 
@@ -154,6 +174,21 @@ void client_routine(config_t *config) {
   free(config->alphabet);
 }
 
+/**************************************************************************
+* Function:    main
+*
+* Description: entry point of application, which calls function to
+*              parse arguments and invokes appropriate routine function
+*
+* Inputs:      int args
+*              number of arguments
+*
+*              char *argv[]
+*              application arguments
+*
+* Returns:     exit status code - 0 (EXIT_SUCCESS) or 1 (EXIT_FAILURE)
+* 
+*************************************************************************/
 int main(int argc, char *argv[]) {
   config_t config = {
     .brute_function = bruteforce_iter,
