@@ -30,40 +30,6 @@ void add_to_queue(config_t* config, task_t* task) {
 }
 
 /**************************************************************************
- * Function:    generate_tasks
- *
- * Description: function that generates thread tasks based on provided
- *              base task
- *
- * Inputs:      config_t* config
- *              Pointer to application config
- *
- *              task_t* initial_task
- *              Pointer to "base" task:
- *              It might be different in case of one-machine mode
- *              (i.e. when we need to bruteforce the whole passwords set) and
- *              in master-worker mode (i.e. when partiaular client needs
- *              to bruteforce subset of passwords set)
- *
- * Returns:     none
- *
- *************************************************************************/
-void generate_tasks(config_t* config, task_t* initial_task) {
-  debug("Task generator started with parameters\n");
-
-  for (int i = 0; i < initial_task->to; i++) {
-    initial_task->password[i] = config->alphabet[0];
-  }
-
-  task_t task = {.from = initial_task->from + LAST_BRUTE_CHARS, .to = initial_task->to};
-  strcpy(task.password, initial_task->password);
-
-  config->brute_function(&task, config, add_to_queue);
-
-  debug("Task generator finished execution\n");
-}
-
-/**************************************************************************
  * Function:    bruteforce_task_job
  *
  * Description: Job for one thread, that extracts tasks from the queue and
@@ -104,6 +70,40 @@ void* bruteforce_task_job(void* arg) {
   debug("Client worker #%d finished\n", args->thread_number);
 
   pthread_exit(NULL);
+}
+
+/**************************************************************************
+ * Function:    generate_tasks
+ *
+ * Description: function that generates thread tasks based on provided
+ *              base task
+ *
+ * Inputs:      config_t* config
+ *              Pointer to application config
+ *
+ *              task_t* initial_task
+ *              Pointer to "base" task:
+ *              It might be different in case of one-machine mode
+ *              (i.e. when we need to bruteforce the whole passwords set) and
+ *              in master-worker mode (i.e. when partiaular client needs
+ *              to bruteforce subset of passwords set)
+ *
+ * Returns:     none
+ *
+ *************************************************************************/
+void generate_tasks(config_t* config, task_t* initial_task) {
+  debug("Task generator started with parameters\n");
+
+  for (int i = 0; i < initial_task->to; i++) {
+    initial_task->password[i] = config->alphabet[0];
+  }
+
+  task_t task = {.from = initial_task->from + LAST_BRUTE_CHARS, .to = initial_task->to};
+  strcpy(task.password, initial_task->password);
+
+  config->brute_function(&task, config, add_to_queue);
+
+  debug("Task generator finished execution\n");
 }
 
 /**************************************************************************
