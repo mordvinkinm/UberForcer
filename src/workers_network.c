@@ -24,7 +24,7 @@ int communicate_client(config_t * config, task_t * task, int sock, result_t * re
   char * buf = malloc(sizeof(char) * BUF_SIZE);
   memset(buf, 0, BUF_SIZE);
 
-  sprintf(buf, MSG_SEND_JOB, task->password, config->value, config->alphabet, task->from, task->to);
+  sprintf(buf, MSG_SEND_JOB, task->password, config->hash, config->alphabet, task->from, task->to);
 
   if (send(sock, buf, strlen(buf), 0) < 0) {
     fprintf(stderr, "Error writing to socket: %s\n", strerror(errno));
@@ -189,9 +189,9 @@ void client_job (config_t * config){
   task_t task;
   memset(task.password, 0, sizeof(task.password));
 
-  sscanf (buf, MSG_SEND_JOB, task.password, config->value, config->alphabet, &task.from, &task.to);
+  sscanf (buf, MSG_SEND_JOB, task.password, config->hash, config->alphabet, &task.from, &task.to);
 
-  trace("Password: %s, Hash: %s, Alphabet: %s, from: %d, to: %d\n", task.password, config->value, config->alphabet, task.from, task.to);
+  trace("Password: %s, Hash: %s, Alphabet: %s, from: %d, to: %d\n", task.password, config->hash, config->alphabet, task.from, task.to);
 
   if (config->num_threads > 1) {
     multi_brute(config, &task);
