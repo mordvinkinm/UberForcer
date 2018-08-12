@@ -63,9 +63,11 @@ typedef struct config_s {
   int length;
   int num_threads;
 
-  // Input parameters
-  // todo: rename "value" to hash and password
-  char* value;
+  // Input parameters (for bruteforce)
+  char* hash;
+
+  // Input parameters (for crypt)
+  char* password;
   char* salt;
 
   // Network parameters

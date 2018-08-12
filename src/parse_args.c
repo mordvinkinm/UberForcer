@@ -192,7 +192,7 @@ int parse_args(int argc, char *argv[], config_t *config) {
     }
 
     config->app_mode = APP_MODE_CRYPT;
-    config->value = argv[2];
+    config->password = argv[2];
     config->salt = argv[3];
 
     return EXIT_SUCCESS;
@@ -207,7 +207,7 @@ int parse_args(int argc, char *argv[], config_t *config) {
 
     config->app_mode = APP_MODE_DECRYPT;
     config->check_function = check_task;
-    config->value = argv[2];
+    config->hash = argv[2];
     
     if (EXIT_SUCCESS == parse_run_params(3, arg_cnt, argv, config)) {
       config->check_function = config->num_threads > 1 ? check_task_r : check_task;
@@ -236,7 +236,7 @@ int parse_args(int argc, char *argv[], config_t *config) {
     }
 
     config->app_mode = APP_MODE_SERVER;
-    config->value = argv[2];
+    config->hash = argv[2];
     config->port = (unsigned short)atoi(argv[3]);
 
     return parse_run_params(4, arg_cnt, argv, config);

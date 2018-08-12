@@ -79,9 +79,9 @@ void help_routine() {
 }
 
 void encrypt_routine(config_t *config) {
-  debug("Started encryption with: password=%s, salt=%s\n", config->value, config->salt);
+  debug("Started encryption with: password=%s, salt=%s\n", config->password, config->salt);
 
-  char *encrypted = crypt(config->value, config->salt);
+  char *encrypted = crypt(config->password, config->salt);
   printf("%s", encrypted);
 }
 
@@ -143,14 +143,14 @@ void client_routine(config_t *config) {
 
   init_network();
 
-  config->value = malloc(sizeof(char) * 255);
+  config->hash = malloc(sizeof(char) * 255);
   config->alphabet = malloc(sizeof(char) * 255);
 
   for (;;){
     client_job(config);
   }
 
-  free(config->value);
+  free(config->hash);
   free(config->alphabet);
 }
 

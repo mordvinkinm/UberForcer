@@ -35,10 +35,10 @@
 * 
 *************************************************************************/
 void check_task(config_t* config, task_t* result) {
-  char* hash = crypt(result->password, config->value);
+  char* hash = crypt(result->password, config->hash);
   trace("Password checked: %s, hash: %s\n", result->password, hash);
 
-  if (strcmp(hash, config->value) == 0) {
+  if (strcmp(hash, config->hash) == 0) {
     config->result.found = true;
     strcpy(config->result.password, result->password);
   }
@@ -88,10 +88,10 @@ void check_task_benchmark(config_t* config, task_t* result) {
 *************************************************************************/
 void check_task_r(config_t* config, task_t* result) {
   char iobuf[CRYPT_HASH_SIZE];
-  char* hash = crypt_r(result->password, config->value, &iobuf);
+  char* hash = crypt_r(result->password, config->hash, &iobuf);
   trace("Password checked: %s, hash: %s\n", result->password, hash);
   
-  if (strcmp(hash, config->value) == 0) {
+  if (strcmp(hash, config->hash) == 0) {
     pthread_mutex_lock(&config->result_mutex);
     config->result.found = true;
     strcpy(config->result.password, result->password);
