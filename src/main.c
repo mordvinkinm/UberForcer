@@ -56,6 +56,10 @@ void generate_server_tasks(config_t * config) {
     initial_task.password[i] = config->alphabet[0];
   }
 
+  // init queue structures
+  queue_init(&config->queue);
+  config->num_tasks = 0;
+
   generate_tasks(config, &initial_task);
 }
 
