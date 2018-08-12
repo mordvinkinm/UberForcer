@@ -29,8 +29,6 @@
 #include "workers.h"
 #include "workers_network.h"
 
-#define LAST_BRUTE_CHARS (2)
-
 void bruteforce(config_t *config) {
   task_t initial_task = {
     .from = 0, 
