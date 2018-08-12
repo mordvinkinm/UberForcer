@@ -155,7 +155,7 @@ int parse_run_params(int start_arg_ind, int end_arg_ind, char *argv[], config_t 
  *              If parsing was unsuccessful for some reason, writes error to
  *              stderr and returns EXIT_FAILURE
  *
- * Inputs:      int argc
+ * Inputs:      int raw_argc
  *              Number of arguments from command line (argument from main func)
  *
  *              *argv[]
@@ -167,9 +167,9 @@ int parse_run_params(int start_arg_ind, int end_arg_ind, char *argv[], config_t 
  * Returns:     int (exit status) - EXIT_SUCCESS (0) or EXIT_FAILURE (1)
  *
  *************************************************************************/
-int parse_args(int argc, char *argv[], config_t *config) {
-  int arg_cnt = argc - 1;
-  if (arg_cnt < 1) {
+int parse_args(int raw_argc, char *argv[], config_t *config) {
+  int args_count = raw_argc - 1;
+  if (args_count < 1) {
     config->app_mode = APP_MODE_HELP;
     return EXIT_SUCCESS;
   }
@@ -182,7 +182,7 @@ int parse_args(int argc, char *argv[], config_t *config) {
   }
 
   if (strcmp("crypt", mode) == 0) {
-    if (arg_cnt < 3) {
+    if (args_count < 3) {
       fprintf(stderr, "Insufficient number of arguments. Expected: %s\n", "crypt <password> <salt>");
 
       return EXIT_FAILURE;
@@ -196,7 +196,7 @@ int parse_args(int argc, char *argv[], config_t *config) {
   }
 
   if (strcmp("decrypt", mode) == 0) {
-    if (arg_cnt < 2) {
+    if (args_count < 2) {
       fprintf(stderr, "Insufficient number of argument. Expected: %s\n", "decrypt <hash>");
 
       return EXIT_FAILURE;
@@ -206,7 +206,7 @@ int parse_args(int argc, char *argv[], config_t *config) {
     config->check_function = check_task;
     config->hash = argv[2];
 
-    if (EXIT_SUCCESS == parse_run_params(3, arg_cnt, argv, config)) {
+    if (EXIT_SUCCESS == parse_run_params(3, args_count, argv, config)) {
       config->check_function = config->num_threads > 1 ? check_task_r : check_task;
       return EXIT_SUCCESS;
     } else {
@@ -218,7 +218,7 @@ int parse_args(int argc, char *argv[], config_t *config) {
     config->app_mode = APP_MODE_BENCHMARK;
     config->check_function = check_task_benchmark;
 
-    if (EXIT_SUCCESS == parse_run_params(2, arg_cnt, argv, config)) {
+    if (EXIT_SUCCESS == parse_run_params(2, args_count, argv, config)) {
       config->check_function = config->num_threads > 1 ? check_task_benchmark_r : check_task_benchmark;
       return EXIT_SUCCESS;
     } else {
@@ -227,6 +227,11 @@ int parse_args(int argc, char *argv[], config_t *config) {
   }
 
   if (strcmp("server", mode) == 0) {
+    if (args_count < 3) {
+      fprintf(stderr, "Insufficient number of argument. Expected: %s\n", "server <hash> <port>");
+      return EXIT_FAILURE;
+    }
+
     if (true != validate_integer(argv[3], 1024, 65535)) {
       fprintf(stderr, "Invalid value for <port>: should be numeric between 1024 and 65535 (inclusive)\n");
       return EXIT_FAILURE;
@@ -236,10 +241,15 @@ int parse_args(int argc, char *argv[], config_t *config) {
     config->hash = argv[2];
     config->port = (unsigned short)atoi(argv[3]);
 
-    return parse_run_params(4, arg_cnt, argv, config);
+    return parse_run_params(4, args_count, argv, config);
   }
 
   if (strcmp("client", mode) == 0) {
+    if (args_count < 3) {
+      fprintf(stderr, "Insufficient number of argument. Expected: %s\n", "client <host> <port>");
+      return EXIT_FAILURE;
+    }
+
     if (true != validate_integer(argv[3], 1024, 65535)) {
       fprintf(stderr, "Invalid value for <port>: should be numeric between 1024 and 65535 (inclusive)\n");
       return EXIT_FAILURE;
@@ -249,7 +259,7 @@ int parse_args(int argc, char *argv[], config_t *config) {
     config->host = argv[2];
     config->port = (unsigned short)atoi(argv[3]);
 
-    return parse_run_params(4, arg_cnt, argv, config);
+    return parse_run_params(4, args_count, argv, config);
   }
 
   fprintf(stderr, "Command not recognized: %s\n", mode);
