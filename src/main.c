@@ -56,7 +56,7 @@ void generate_server_tasks(config_t * config) {
     initial_task.password[i] = config->alphabet[0];
   }
 
-  generate_tasks_worker(config, &initial_task);
+  generate_tasks(config, &initial_task);
 }
 
 /**************************************************************************
