@@ -1,23 +1,23 @@
 /**************************************************************************
-*   Common data structures, constants etc. related to app configuration
-*
-*   File    : config.h
-*   Author  : Mikhail Mordvinkin
-*   Date    : July 24, 2018
-*
-**************************************************************************/
+ *   Common data structures, constants etc. related to app configuration
+ *
+ *   File    : config.h
+ *   Author  : Mikhail Mordvinkin
+ *   Date    : July 24, 2018
+ *
+ **************************************************************************/
 
 #ifndef CONFIG_H
 #define CONFIG_H
 
 #include "common.h"
-#include "struct.h"
 #include "queue.h"
+#include "struct.h"
 
 // Defines constants for application run mode
-typedef enum { 
+typedef enum {
   // Displays help message
-  APP_MODE_HELP, 
+  APP_MODE_HELP,
 
   // Encrypts provided password using provided salt, thus generating hash
   APP_MODE_CRYPT,
@@ -33,7 +33,7 @@ typedef enum {
 
   // Client, i.e. worker mode
   APP_MODE_CLIENT
-} app_mode_t; 
+} app_mode_t;
 
 // Defines bruteforce algorithm - either recursive or ietrative
 typedef enum {
@@ -46,8 +46,8 @@ typedef enum {
 
 typedef struct config_s {
   // Flexible function pointers
-  void (*brute_function) (task_t *, struct config_s *, void (*check_handler) (struct config_s * config, task_t *task));
-  void (*check_function) (struct config_s *config, task_t *task);
+  void (*brute_function)(task_t*, struct config_s*, void (*check_handler)(struct config_s* config, task_t* task));
+  void (*check_function)(struct config_s* config, task_t* task);
 
   // Application modes
   app_mode_t app_mode;
@@ -79,7 +79,7 @@ typedef struct config_s {
   pthread_mutex_t num_tasks_mutex;
   pthread_cond_t num_tasks_cv;
 } config_t;
-  
+
 typedef struct worker_args_s {
   config_t* config;
   int thread_number;  // todo: chagne to thread_name

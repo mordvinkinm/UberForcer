@@ -2,11 +2,11 @@
 #define PROTOCOL_H
 
 /**************************************************************************
-*
-* Description: Message with task description, which will be sent 
-*              from server to client
-*              
-*************************************************************************/
+ *
+ * Description: Message with task description, which will be sent
+ *              from server to client
+ *
+ *************************************************************************/
 #define MSG_SEND_JOB                \
   "<?xml version=\"1.0\"?>\n"       \
   "<msg>\n"                         \
@@ -22,13 +22,12 @@
   " </args>\n"                      \
   "</msg>"
 
-
 /**************************************************************************
-*
-* Description: Message with task result description, which will be sent
-*              from client to server
-*              
-*************************************************************************/
+ *
+ * Description: Message with task result description, which will be sent
+ *              from client to server
+ *
+ *************************************************************************/
 #define MSG_REPORT_RESULT                      \
   "<?xml version=\"1.0\"?>\n"                  \
   "<msg>\n"                                    \

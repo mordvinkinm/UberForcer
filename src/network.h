@@ -1,16 +1,16 @@
 /**************************************************************************
-*            Cross-platform encapsulation of requried network operation
-*
-*   File    : network.h
-*   Purpose : Encapsulates definitions for cross-platform compilation of
-*             network operations
-*   Author  : Mikhail Mordvinkin
-*   Date    : July 24, 2018
-*
-***************************************************************************
-*   Due to platform-specific nature of sockets, use "includes" and definitions
-*   specific for target platform
-***********************************************************************/
+ *            Cross-platform encapsulation of requried network operation
+ *
+ *   File    : network.h
+ *   Purpose : Encapsulates definitions for cross-platform compilation of
+ *             network operations
+ *   Author  : Mikhail Mordvinkin
+ *   Date    : July 24, 2018
+ *
+ ***************************************************************************
+ *   Due to platform-specific nature of sockets, use "includes" and definitions
+ *   specific for target platform
+ ***********************************************************************/
 
 #ifndef NETWORK_H
 #define NETWORK_H
@@ -35,21 +35,21 @@
 #endif
 
 /**************************************************************************
-*
-* Description: Structure to pass arguments into a thread worker
-*              
-*************************************************************************/
+ *
+ * Description: Structure to pass arguments into a thread worker
+ *
+ *************************************************************************/
 typedef struct client_listener_args_s {
-    config_t * config;
-    int descriptor;
+  config_t* config;
+  int descriptor;
 } client_listener_args_t;
 
 /**************************************************************************
-* Function:    init_network
-*
-* Description: Initializes network operation, making appropriate system calls
-*              
-*************************************************************************/
+ * Function:    init_network
+ *
+ * Description: Initializes network operation, making appropriate system calls
+ *
+ *************************************************************************/
 void init_network();
 
 #endif /* NETWORK_H */
