@@ -49,18 +49,39 @@ int communicate_client(config_t * config, task_t * task, int sock, result_t * re
   return EXIT_SUCCESS;
 }
 
-void server_task_manager(int sock, config_t * config){
+void* server_task_manager_job (void * raw_args) {
+  client_listener_args_t * args = raw_args;
+
+  int sock = args->descriptor;
+  config_t * config = args->config;
+
   task_t task;
   result_t result;
   
+  int failed_task_cnt = 0;
+  bool task_failed = false;
   for (;;) {
-    queue_pop(&config->queue, &task);
-    task.to = task.from;
-    task.from = 0;
+    if (task_failed == false) {
+      queue_pop(&config->queue, &task);
+      task.to = task.from;
+      task.from = 0;
+    }
 
     if (EXIT_SUCCESS != communicate_client(config, &task, sock, &result)) {
-      fprintf(stderr, "Communication failed. Task re-added to the queue\n");
-      re_add_task(config, &task);
+      ++failed_task_cnt;
+      task_failed = true;
+
+      if (failed_task_cnt >= FAILED_TASK_THRESHOLD) {
+        fprintf(stderr, "Exceeded maximum amount of failed tasks. Client disconnected, re-adding task to the queue...\n");
+        re_add_task(config, &task);
+        pthread_exit(NULL);
+      } else {
+        fprintf(stderr, "Communication failed. Retrying this task...\n");
+        continue;
+      }
+    } else {
+      failed_task_cnt = 0;
+      task_failed = false;
     }
 
     if (result.found == true) {
@@ -68,6 +89,8 @@ void server_task_manager(int sock, config_t * config){
 
       strcpy(config->result.password, result.password);
       config->result.found = result.found;
+
+      pthread_exit(NULL);
     }
 
     pthread_mutex_lock(&config->num_tasks_mutex);
@@ -77,17 +100,6 @@ void server_task_manager(int sock, config_t * config){
     if (config->num_tasks == 0)
       pthread_cond_signal(&config->num_tasks_cv);
   }
-}
-
-void * server_task_manager_job (void * raw_args) {
-  client_listener_args_t * args = raw_args;
-
-  int sock = args->descriptor;
-  config_t * config = args->config;
-
-  server_task_manager(sock, config);
-
-  return (NULL);
 }
 
 void* server_listener_thread_job(void * raw_args) {
@@ -175,37 +187,39 @@ void client_job (config_t * config){
 
   debug ("Connected to %s\n", config->host);
 
-  // TASK PASSWORD
-  char * buf = malloc(sizeof(char) * BUF_SIZE);
-  memset(buf, 0, BUF_SIZE);
-  
-  if (recv(sock, buf, BUF_SIZE, 0) < 0) {
-    fprintf(stderr, "Error reading from socket: %s\n", strerror(errno));
-    return;
+  for (;;) {
+    // TASK PASSWORD
+    char * buf = malloc(sizeof(char) * BUF_SIZE);
+    memset(buf, 0, BUF_SIZE);
+    
+    if (recv(sock, buf, BUF_SIZE, 0) < 0) {
+      fprintf(stderr, "Error reading from socket: %s\n", strerror(errno));
+      return;
+    }
+
+    trace("Message received from server:\n%s\n", buf);
+
+    task_t task;
+    memset(task.password, 0, sizeof(task.password));
+
+    sscanf (buf, MSG_SEND_JOB, task.password, config->hash, config->alphabet, &task.from, &task.to);
+
+    trace("Password: %s, Hash: %s, Alphabet: %s, from: %d, to: %d\n", task.password, config->hash, config->alphabet, task.from, task.to);
+
+    if (config->num_threads > 1) {
+      multi_brute(config, &task);
+    } else {
+      single_brute(config, &task);
+    }
+
+    memset(buf, 0, BUF_SIZE);
+    sprintf(buf, MSG_REPORT_RESULT, config->result.password, config->result.found);
+
+    if (send(sock, buf, strlen(buf), 0) < 0){
+      fprintf(stderr, "Error writing to socket: %s\n", strerror(errno));
+      return;
+    }
+
+    trace("Message sent to server:\n%s\n", buf);
   }
-
-  trace("Message received from server:\n%s\n", buf);
-
-  task_t task;
-  memset(task.password, 0, sizeof(task.password));
-
-  sscanf (buf, MSG_SEND_JOB, task.password, config->hash, config->alphabet, &task.from, &task.to);
-
-  trace("Password: %s, Hash: %s, Alphabet: %s, from: %d, to: %d\n", task.password, config->hash, config->alphabet, task.from, task.to);
-
-  if (config->num_threads > 1) {
-    multi_brute(config, &task);
-  } else {
-    single_brute(config, &task);
-  }
-
-  memset(buf, 0, BUF_SIZE);
-  sprintf(buf, MSG_REPORT_RESULT, config->result.password, config->result.found);
-
-  if (send(sock, buf, strlen(buf), 0) < 0){
-    fprintf(stderr, "Error writing to socket: %s\n", strerror(errno));
-    return;
-  }
-
-  trace("Message sent to server:\n%s\n", buf);
 }

@@ -103,7 +103,7 @@ void* bruteforce_task_job(void* arg) {
 
   debug("Client worker #%d finished\n", args->thread_number);
 
-  pthread_exit(EXIT_SUCCESS);
+  pthread_exit(NULL);
 }
 
 /**************************************************************************
