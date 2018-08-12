@@ -160,7 +160,7 @@ void client_job (config_t * config){
   server = gethostbyname (config->host);
   memmove ((char *) &serv_addr.sin_addr.s_addr, (char *) server->h_addr, server->h_length);
 
-  printf ("Establish connect to %s\n", config->host);
+  debug ("Establish connect to %s\n", config->host);
 
   int sock = socket(AF_INET, SOCK_STREAM, 0);
   if (sock < 0) {
@@ -173,7 +173,7 @@ void client_job (config_t * config){
     return;
   }
 
-  printf ("Connected to %s\n", config->host);
+  debug ("Connected to %s\n", config->host);
 
   // TASK PASSWORD
   char * buf = malloc(sizeof(char) * BUF_SIZE);
