@@ -81,29 +81,15 @@ void* server_listener_thread_job(void* raw_args) {
 
   debug("Started server listener on port %d\n", config->port);
 
-  struct sockaddr_in serv_addr, client_addr;
-
-  int sock = socket(AF_INET, SOCK_STREAM, 0);
+  int sock = init_server_listener(config);
   if (sock < 0) {
-    fprintf(stderr, "Error opening socket: %d (%s)\n", errno, strerror(errno));
     return NULL;
   }
-
-  serv_addr.sin_family = AF_INET;
-  serv_addr.sin_addr.s_addr = INADDR_ANY;
-  serv_addr.sin_port = htons(config->port);
-
-  if (bind(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr))) {
-    fprintf(stderr, "Error binding socket: %d (%s)\n", errno, strerror(errno));n
-    
-    return NULL;
-  }
-
-  listen(sock, 10);
 
   debug("Waiting for incoming connections...\n");
 
   while (1) {
+    struct sockaddr_in client_addr;
     socklen_t cl_len = sizeof(client_addr);
     int newsock = accept(sock, (struct sockaddr*)&client_addr, &cl_len);
     debug("Connection accepted\n");
@@ -142,7 +128,7 @@ void server_listener(config_t* config) {
  *              - downloads task to bruteforce
  *              - bruteforces task, using client-size settings (like thread cnt)
  *              - reports result back (fount or not, and password if found)
- * 
+ *
  *              todo: implement "exit" command and interrupt client routine
  *              if exit command was received
  *

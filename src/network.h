@@ -53,6 +53,20 @@ typedef struct client_listener_args_s {
 void init_network();
 
 /**************************************************************************
+ * Function:    init_server_listener
+ *
+ * Description: Initializes network part of bruteforcing server, listening
+ *              for incoming connection
+ *
+ * Inputs:      config_t *config
+ *              pointer to application config
+ *
+ * Returns:     socket id or -1 if connection failed
+ *
+ *************************************************************************/
+int init_server_listener(config_t *config);
+
+/**************************************************************************
  * Function:    connect_to_server
  *
  * Description: Connects client to a bruteforcing server.

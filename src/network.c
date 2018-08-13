@@ -28,6 +28,41 @@ void init_network() {
 }
 
 /**************************************************************************
+ * Function:    init_server_listener
+ *
+ * Description: Initializes network part of bruteforcing server, listening
+ *              for incoming connection
+ *
+ * Inputs:      config_t *config
+ *              Pointer to application config
+ *
+ * Returns:     socket id or -1 if connection failed
+ *
+ *************************************************************************/
+int init_server_listener(config_t *config) {
+  struct sockaddr_in serv_addr
+
+  int sock = socket(AF_INET, SOCK_STREAM, 0);
+  if (sock < 0) {
+    fprintf(stderr, "Error opening socket: %d (%s)\n", errno, strerror(errno));
+    return sock;
+  }
+
+  serv_addr.sin_family = AF_INET;
+  serv_addr.sin_addr.s_addr = INADDR_ANY;
+  serv_addr.sin_port = htons(config->port);
+
+  if (bind(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr))) {
+    fprintf(stderr, "Error binding socket: %d (%s)\n", errno, strerror(errno));
+    return sock;
+  }
+
+  listen(sock, 10);
+
+  return sock;
+}
+
+/**************************************************************************
  * Function:    connect_to_server
  *
  * Description: Connects client to a bruteforcing server.
