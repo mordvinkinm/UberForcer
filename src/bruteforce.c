@@ -86,7 +86,7 @@ void bruteforce_rec(task_t* task, config_t* config, void (*check_handler)(config
 void bruteforce_iter(task_t* task, config_t* config, void (*check_handler)(config_t* config, task_t* task)) {
   int i;
   int alphabet_length = strlen(config->alphabet);
-  int new_text[MAX_LEN + 1];
+  int new_text[PASS_MAX_LEN + 1];
 
   for (i = task->from; i < task->to; ++i)
     new_text[i] = 0;
