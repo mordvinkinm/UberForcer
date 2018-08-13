@@ -19,19 +19,19 @@
 #include "config.h"
 
 #ifdef _WIN32
-    #include <winsock2.h>
-    #include <ws2tcpip.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #elif _WIN64
-    #include <winsock2.h>
-    #include <ws2tcpip.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #elif defined __linux__
-    #error "Linux is not supported yet"
+#error "Linux is not supported yet"
 #elif defined __unix__
-    #error "Unix is not supported yet"
+#error "Unix is not supported yet"
 #elif defined TARGET_OS_MAC
-    #error "Macos is not supported yet"
+#error "Macos is not supported yet"
 #else
-    #error "Unknown target platform"
+#error "Unknown target platform"
 #endif
 
 /**************************************************************************
@@ -40,7 +40,7 @@
  *
  *************************************************************************/
 typedef struct client_listener_args_s {
-  config_t* config;
+  config_t *config;
   int descriptor;
 } client_listener_args_t;
 
@@ -59,13 +59,83 @@ void init_network();
  *
  * Inputs:      char *host
  *              Pointer to bruteforcing server host
- * 
+ *
  *              unsigned short port
  *              Port number. Should be between 1024 and 65535 (inclusive)
  *
  * Returns:     socket id or -1 if connection failed
  *
  *************************************************************************/
-int connect_to_server(config_t *config, struct sockaddr_in *serv_addr);
+int connect_to_server(char *host, unsigned short port, struct sockaddr_in *serv_addr);
+
+/**************************************************************************
+ * Function:    send_task
+ *
+ * Description: sends bruteforcing task to a client over network
+ *
+ * Inputs:      int sock
+ *              Socket ID
+ *
+ *              config_t *config
+ *              Pointer to application config
+ *
+ *              task_t *task
+ *              Pointer to task that will be sent to a client
+ *
+ * Returns:     exit code - EXIT_SUCCESS (0) or EXIT_FAILURE (1)
+ *
+ *************************************************************************/
+int send_task(int sock, config_t *config, task_t *task);
+
+/**************************************************************************
+ * Function:    read_task
+ *
+ * Description: receives bruteforcing task from a server over network
+ *
+ * Inputs:      int sock
+ *              Socket ID
+ *
+ *              config_t *config
+ *              Pointer to application config
+ *
+ *              task_t *task
+ *              Pointer to resulting task
+ *
+ * Returns:     exit code - EXIT_SUCCESS (0) or EXIT_FAILURE (1)
+ *
+ *************************************************************************/
+int read_task(int sock, config_t *config, task_t *task);
+
+/**************************************************************************
+ * Function:    send_result
+ *
+ * Description: sends bruteforcing task result over network back to server
+ *
+ * Inputs:      int sock
+ *              Socket ID
+ *
+ *              result_t *result
+ *              Pointer to resulting task
+ *
+ * Returns:     exit code - EXIT_SUCCESS (0) or EXIT_FAILURE (1)
+ *
+ *************************************************************************/
+int send_result(int sock, result_t *result);
+
+/**************************************************************************
+ * Function:    read_result
+ *
+ * Description: reads bruteforcing task that was sent to server over network
+ *
+ * Inputs:      int sock
+ *              Socket ID
+ *
+ *              result_t *result
+ *              Pointer to resulting task
+ *
+ * Returns:     exit code - EXIT_SUCCESS (0) or EXIT_FAILURE (1)
+ *
+ *************************************************************************/
+int read_result(int sock, result_t *result);
 
 #endif /* NETWORK_H */
