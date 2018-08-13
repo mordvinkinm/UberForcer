@@ -22,7 +22,7 @@ mingw32-make uberforcer_windows
 ## Windows (without make)
 If you don't have make tool for some reason, here is gcc cmd command:
 <pre>
-gcc -o uberforcer.exe -O2 lib/crypt3.h lib/crypt3.c src/main.c src/common.h src/config.h src/check.c src/check.h src/bruteforce.c src/bruteforce.h src/parse_args.h src/parse_args.c src/struct.h src/queue.h src/queue.c src/workers.h src/workers.c src/network.h src/network.c src/workers_network.h src/workers_network.c -lpthread -lws2_32
+gcc -o uberforcer.exe -O2 lib/crypt3.h lib/crypt3.c src/main.c src/common.h src/config.h src/check.c src/check.h src/bruteforce.c src/bruteforce.h src/parse_args.h src/parse_args.c src/struct.h src/struct.c src/queue.h src/queue.c src/workers.h src/workers.c src/network.h src/network.c src/workers_network.h src/workers_network.c -lpthread -lws2_32
 </pre>
 
 - Use -DDEBUG=1 compilation key to build app with verbose info
