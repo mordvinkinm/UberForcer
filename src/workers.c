@@ -52,6 +52,8 @@ void* bruteforce_task_job(void* arg) {
   debug("Worker #%d started\n", args->thread_number);
 
   task_t task;
+  init_task(&task);
+  
   for (;;) {
     queue_pop(&config->queue, &task);
     task.to = task.from;
