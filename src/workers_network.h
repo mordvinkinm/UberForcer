@@ -4,7 +4,6 @@
 #include "config.h"
 
 #define FAILED_TASK_THRESHOLD 3
-#define BUF_SIZE 512
 
 void server_listener(config_t * config);
 
