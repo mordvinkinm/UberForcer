@@ -89,9 +89,10 @@ void* server_listener_thread_job(void* raw_args) {
   debug("Waiting for incoming connections...\n");
 
   while (1) {
-    struct sockaddr_in client_addr;
-    socklen_t cl_len = sizeof(client_addr);
-    int newsock = accept(sock, (struct sockaddr*)&client_addr, &cl_len);
+    int newsock = accept_client_connection(sock);
+    if (newsock < 0)
+      continue;
+
     debug("Connection accepted\n");
 
     pthread_attr_t attr;

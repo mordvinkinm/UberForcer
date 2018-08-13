@@ -67,6 +67,19 @@ void init_network();
 int init_server_listener(config_t *config);
 
 /**************************************************************************
+ * Function:    accept_client_connection
+ *
+ * Description: accepts client connection to the bruteforcing server
+ *
+ * Inputs:      int sock
+ *              socket_id that listens for incoming connections
+ *
+ * Returns:     new socket id or -1 if connection failed
+ *
+ *************************************************************************/
+int accept_client_connection(int sock);
+
+/**************************************************************************
  * Function:    connect_to_server
  *
  * Description: Connects client to a bruteforcing server.

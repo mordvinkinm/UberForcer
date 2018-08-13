@@ -40,7 +40,7 @@ void init_network() {
  *
  *************************************************************************/
 int init_server_listener(config_t *config) {
-  struct sockaddr_in serv_addr
+  struct sockaddr_in serv_addr;
 
   int sock = socket(AF_INET, SOCK_STREAM, 0);
   if (sock < 0) {
@@ -60,6 +60,30 @@ int init_server_listener(config_t *config) {
   listen(sock, 10);
 
   return sock;
+}
+
+/**************************************************************************
+ * Function:    accept_client_connection
+ *
+ * Description: accepts client connection to the bruteforcing server
+ *
+ * Inputs:      int sock
+ *              socket_id that listens for incoming connections
+ *
+ * Returns:     new socket id or -1 if connection failed
+ *
+ *************************************************************************/
+int accept_client_connection(int sock) {
+  struct sockaddr_in client_addr;
+  socklen_t cl_len = sizeof(client_addr);
+
+  int newsock = accept(sock, (struct sockaddr *)&client_addr, &cl_len);
+  if (newsock < 0) {
+    fprintf(stderr, "Couldn't accept client connection: %s\n", strerror(errno));
+    return newsock;
+  }
+
+  return newsock;
 }
 
 /**************************************************************************
