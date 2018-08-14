@@ -10,6 +10,21 @@
 #include "workers.h"
 #include "workers_network.h"
 
+/**************************************************************************
+ * Function:    re_add_task
+ *
+ * Description: Re-adds task back to the queue if network communication
+ *              between server and client failed for some reason
+ *
+ * Inputs:      config_t *config
+ *              pointer to application config
+ * 
+ *              task_t *task
+ *              pointer to task that will be added back to queue
+ *
+ * Returns:     socket id or -1 if connection failed
+ *
+ *************************************************************************/
 void re_add_task(config_t* config, task_t* task) {
   pthread_mutex_lock(&config->num_tasks_mutex);
   ++config->num_tasks;
@@ -109,6 +124,15 @@ void* server_listener_thread_job(void* raw_args) {
   }
 }
 
+/**************************************************************************
+ * Function:    server_listener
+ *
+ * Description: Wrapper that starts a new thread to host server listener
+ *
+ * Inputs:      config_t *config
+ *              pointer to application config
+ *
+ *************************************************************************/
 void server_listener(config_t* config) {
   pthread_attr_t attr;
   pthread_attr_init(&attr);
@@ -136,7 +160,7 @@ void server_listener(config_t* config) {
  * Inputs:      config_t *config
  *              Pointer to application config
  *
- * Returns:     none
+ * Returns:     exit code - either EXIT_SUCCESS or EXIT_FAILURE
  *
  *************************************************************************/
 int client_job(config_t* config) {
