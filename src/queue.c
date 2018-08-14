@@ -27,8 +27,6 @@
  * Inputs:      queue_t *q
  *              Pointer to queue structure
  *
- * Returns:     none
- *
  *************************************************************************/
 void queue_init(queue_t* q) {
   q->head = 0;
@@ -53,8 +51,6 @@ void queue_init(queue_t* q) {
  *
  *              task_t *result
  *              Pointer to task to be added into the queue
- *
- * Returns:    none
  *
  *************************************************************************/
 void queue_push(queue_t* q, task_t* task) {
@@ -83,7 +79,6 @@ void queue_push(queue_t* q, task_t* task) {
  *              task_t *result
  *              Out buffer in which removed task will be stored
  *
- * Returns:     none
  *************************************************************************/
 void queue_pop(queue_t* q, task_t* result) {
   sem_wait(&q->full);

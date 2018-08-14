@@ -10,8 +10,6 @@
  * Inputs:      task_t *task
  *              Pointer to a task to initialize
  *
- * Returns:     none
- *
  *************************************************************************/
 void init_task(task_t *task) {
   task->from = 0;
@@ -27,8 +25,6 @@ void init_task(task_t *task) {
  *
  * Inputs:      result_t *result
  *              Pointer to a result struct to initialize
- *
- * Returns:     none
  *
  *************************************************************************/
 void init_result(result_t *result) {

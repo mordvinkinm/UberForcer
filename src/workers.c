@@ -17,8 +17,6 @@
  *              task_t *task
  *              Pointer to task that will be added to the queue
  *
- * Returns:     none
- *
  *************************************************************************/
 void add_to_queue(config_t* config, task_t* task) {
   pthread_mutex_lock(&config->num_tasks_mutex);
@@ -90,8 +88,6 @@ void* bruteforce_task_job(void* arg) {
  *              in master-worker mode (i.e. when partiaular client needs
  *              to bruteforce subset of passwords set)
  *
- * Returns:     none
- *
  *************************************************************************/
 void generate_tasks(config_t* config, task_t* initial_task) {
   debug("Task generator started with parameters\n");
@@ -120,8 +116,6 @@ void generate_tasks(config_t* config, task_t* initial_task) {
  *              task_t* initial_task
  *              Pointer to task needs to be bruteforced
  *
- * Returns:     none
- *
  *************************************************************************/
 void single_brute(config_t* config, task_t* initial_task) {
   debug("Started in single-thread mode: password %s, from: %d, to: %d\n", initial_task->password, initial_task->from, initial_task->to);
@@ -145,8 +139,6 @@ void single_brute(config_t* config, task_t* initial_task) {
  *
  *              task_t* initial_task
  *              Pointer to task needs to be bruteforced
- *
- * Returns:     none
  *
  *************************************************************************/
 void multi_brute(config_t* config, task_t* initial_task) {

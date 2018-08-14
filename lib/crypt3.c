@@ -139,7 +139,6 @@ static const char e2[] =
 *              Pointer to 64 character array.  Each character represents a
 *              bit in the key.
 *
-* Returns:     none
 **************************************************************************/
 void setkey(char *key)
 {
@@ -207,7 +206,6 @@ void setkey(char *key)
 *              char (*KS)[16][48]
 *              Key schedule array
 *
-* Returns:     none
 **************************************************************************/
 void setkey_r(char *key, char (*C)[28], char (*D)[28], char (*E)[48], char (*KS)[16][48])
 {
@@ -351,7 +349,6 @@ static char preS[48];
 *              Pointer to 64 character array.  Each character represents a
 *              bit in the data block.
 *
-* Returns:     none
 **************************************************************************/
 void encrypt(char *block)
 {
@@ -458,7 +455,6 @@ void encrypt(char *block)
 *              char (*KS)[16][48]
 *              Key schedule array
 *
-* Returns:     none
 **************************************************************************/
 void encrypt_r(char *block, char (*E)[48], char (*KS)[16][48])
 {

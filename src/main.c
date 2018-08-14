@@ -68,8 +68,6 @@ void generate_server_tasks(config_t * config) {
 *
 * Description: One of available application modes - show help message
 *
-* Returns:     none
-* 
 *************************************************************************/
 void help_routine() {
   printf("Available commands:\n\n");
@@ -96,8 +94,6 @@ void help_routine() {
 *
 * Inputs:      config_t *config
 *              Pointer to application config
-*
-* Returns:     none
 * 
 *************************************************************************/
 void encrypt_routine(config_t *config) {
