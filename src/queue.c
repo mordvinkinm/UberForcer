@@ -20,14 +20,11 @@
 #include "queue.h"
 
 /**************************************************************************
- * Function:    queue_init
  *
  * Description: initializes queue, setting mutexes, semaphores and head/tail
  *
  * Inputs:      queue_t *q
  *              Pointer to queue structure
- *
- * Returns:     none
  *
  *************************************************************************/
 void queue_init(queue_t* q) {
@@ -42,7 +39,6 @@ void queue_init(queue_t* q) {
 }
 
 /**************************************************************************
- * Function:    queue_push
  *
  * Description: adds element to the end of queue
  *              if queue is full, wait on semaphore until at least one
@@ -53,8 +49,6 @@ void queue_init(queue_t* q) {
  *
  *              task_t *result
  *              Pointer to task to be added into the queue
- *
- * Returns:    none
  *
  *************************************************************************/
 void queue_push(queue_t* q, task_t* task) {
@@ -71,7 +65,6 @@ void queue_push(queue_t* q, task_t* task) {
 }
 
 /**************************************************************************
- * Function:    queue_pop
  *
  * Description: removes first element from the queue.
  *              If there are no elements in the queue, wait until at least
@@ -83,7 +76,6 @@ void queue_push(queue_t* q, task_t* task) {
  *              task_t *result
  *              Out buffer in which removed task will be stored
  *
- * Returns:     none
  *************************************************************************/
 void queue_pop(queue_t* q, task_t* result) {
   sem_wait(&q->full);

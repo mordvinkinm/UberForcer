@@ -64,12 +64,9 @@ void generate_server_tasks(config_t * config) {
 }
 
 /**************************************************************************
-* Function:    help_routine
 *
 * Description: One of available application modes - show help message
 *
-* Returns:     none
-* 
 *************************************************************************/
 void help_routine() {
   printf("Available commands:\n\n");
@@ -89,15 +86,12 @@ void help_routine() {
 }
 
 /**************************************************************************
-* Function:    encrypt_routine
 *
 * Description: One of available application modes - encrypts a password
 *              using provided salt
 *
 * Inputs:      config_t *config
 *              Pointer to application config
-*
-* Returns:     none
 * 
 *************************************************************************/
 void encrypt_routine(config_t *config) {
@@ -175,7 +169,6 @@ void client_routine(config_t *config) {
 }
 
 /**************************************************************************
-* Function:    main
 *
 * Description: entry point of application, which calls function to
 *              parse arguments and invokes appropriate routine function

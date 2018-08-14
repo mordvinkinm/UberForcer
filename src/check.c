@@ -20,32 +20,29 @@
 #include "config.h"
 
 /**************************************************************************
- * Function:    check_task
  *
  * Description: Thread-unsafe version of hash checker.
- *              Calls "crypt" function and checks if result equal to target hash
+ *              Calls "crypt" function and checks if result equals to target
+ *              hash; if equals, then fills config.task's found property.
  *
  * Inputs:      config_t *config
  *              Pointer to application config
  *
- *              task_t *result
+ *              [out] task_t *task
  *              Pointer to task with password to check
  *
- * Returns:     none; modifies config->result's fields in case of pass match
- *
  *************************************************************************/
-void check_task(config_t* config, task_t* result) {
-  char* hash = crypt(result->password, config->hash);
-  trace("Password checked: %s, hash: %s\n", result->password, hash);
+void check_task(config_t* config, task_t* task) {
+  char* hash = crypt(task->password, config->hash);
+  trace("Password checked: %s, hash: %s\n", task->password, hash);
 
   if (strcmp(hash, config->hash) == 0) {
     config->result.found = true;
-    strcpy(config->result.password, result->password);
+    strcpy(config->result.password, task->password);
   }
 }
 
 /**************************************************************************
- * Function:    check_task_benchmark
  *
  * Description: Thread-unsafe function to calculate bruteforcing performance.
  *              Calls "crypt" function, but ignores result of "crypt" call.
@@ -55,21 +52,18 @@ void check_task(config_t* config, task_t* result) {
  * Inputs:      config_t *config
  *              Pointer to application config
  *
- *              task_t *result
+ *              task_t *task
  *              Pointer to task with generated password
  *
- * Returns:     none
- *
  *************************************************************************/
-void check_task_benchmark(config_t* config, task_t* result) {
-  trace("Password checked: %s\n", result->password);
+void check_task_benchmark(config_t* config, task_t* task) {
+  trace("Password checked: %s\n", task->password);
 
   // prevent "unused" variable from optimization
-  volatile int whatever = strcmp(crypt(result->password, "salt"), "hash");
+  volatile int whatever = strcmp(crypt(task->password, "salt"), "hash");
 }
 
 /**************************************************************************
- * Function:    check_task_r
  *
  * Description: Reentrant version of hash checker.
  *              Under the hood, calls crypt_r and checks result against
@@ -78,27 +72,24 @@ void check_task_benchmark(config_t* config, task_t* result) {
  * Inputs:      config_t *config
  *              Pointer to application config
  *
- *              task_t *result
+ *              task_t *task
  *              Pointer to task with generated password
  *
- * Returns:     none
- *
  *************************************************************************/
-void check_task_r(config_t* config, task_t* result) {
+void check_task_r(config_t* config, task_t* task) {
   char iobuf[CRYPT_HASH_SIZE];
-  char* hash = crypt_r(result->password, config->hash, &iobuf);
-  trace("Password checked: %s, hash: %s\n", result->password, hash);
+  char* hash = crypt_r(task->password, config->hash, &iobuf);
+  trace("Password checked: %s, hash: %s\n", task->password, hash);
 
   if (strcmp(hash, config->hash) == 0) {
     pthread_mutex_lock(&config->result_mutex);
     config->result.found = true;
-    strcpy(config->result.password, result->password);
+    strcpy(config->result.password, task->password);
     pthread_mutex_unlock(&config->result_mutex);
   }
 }
 
 /**************************************************************************
- * Function:    check_task_benchmark_r
  *
  * Description: Reentrant function to calculate bruteforcing performance.
  *              Calls "crypt_r", but ignores the result (thus bruteforce
@@ -107,16 +98,14 @@ void check_task_r(config_t* config, task_t* result) {
  * Inputs:      config_t *config
  *              Pointer to application config
  *
- *              task_t *result
+ *              task_t *task
  *              Pointer to task with generated password
  *
- * Returns:     none
- *
  *************************************************************************/
-void check_task_benchmark_r(config_t* config, task_t* result) {
-  trace("Password checked: %s\n", result->password);
+void check_task_benchmark_r(config_t* config, task_t* task) {
+  trace("Password checked: %s\n", task->password);
 
   // prevent "unused" variable from optimization
   char iobuf[CRYPT_HASH_SIZE];
-  volatile int whatever = strcmp(crypt_r(result->password, "salt", &iobuf), "hash");
+  volatile int whatever = strcmp(crypt_r(task->password, "salt", &iobuf), "hash");
 }

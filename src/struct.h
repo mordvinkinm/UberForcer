@@ -3,9 +3,9 @@
 
 #include "common.h"
 
-#define MAX_LEN (20)
+#define PASS_MAX_LEN (20)
 
-typedef char password_t[MAX_LEN + 1];
+typedef char password_t[PASS_MAX_LEN + 1];
 
 /**************************************************************************
  *
@@ -29,5 +29,31 @@ typedef struct result_s {
   password_t password;
   bool found;
 } result_t;
+
+/**************************************************************************
+ * Function:    init_task
+ *
+ * Description: Initializes task, setting its byte data to zeroes
+ *
+ * Inputs:      task_t *task
+ *              Pointer to a task to initialize
+ *
+ * Returns:     none
+ *
+ *************************************************************************/
+void init_task(task_t *task);
+
+/**************************************************************************
+ * Function:    bruteforce_rec
+ *
+ * Description: Initializes result, setting ts byte data to zeroes
+ *
+ * Inputs:      result_t *result
+ *              Pointer to a result struct to initialize
+ *
+ * Returns:     none
+ *
+ *************************************************************************/
+void init_result(result_t *result);
 
 #endif /* RESULT_H */

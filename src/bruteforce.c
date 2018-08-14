@@ -18,7 +18,6 @@
 #include "config.h"
 
 /**************************************************************************
- * Function:    bruteforce_rec
  *
  * Description: Performs recursive bruteforce
  *
@@ -33,8 +32,6 @@
  *              Pointer to function that will be run for each bruteforce result
  *              (for example, function to check hash; or another bruteforce
  *              function if we need to parallelize bruteforce)
- *
- * Returns:     none
  *
  *************************************************************************/
 void bruteforce_rec(task_t* task, config_t* config, void (*check_handler)(config_t* congfig, task_t* task)) {
@@ -64,7 +61,6 @@ void bruteforce_rec(task_t* task, config_t* config, void (*check_handler)(config
 }
 
 /**************************************************************************
- * Function:    bruteforce_iter
  *
  * Description: Performs iterative bruteforce
  *
@@ -80,13 +76,11 @@ void bruteforce_rec(task_t* task, config_t* config, void (*check_handler)(config
  *              (for example, function to check hash; or another bruteforce
  *              function if we need to parallelize bruteforce)
  *
- * Returns:     none
- *
  *************************************************************************/
 void bruteforce_iter(task_t* task, config_t* config, void (*check_handler)(config_t* config, task_t* task)) {
   int i;
   int alphabet_length = strlen(config->alphabet);
-  int new_text[MAX_LEN + 1];
+  int new_text[PASS_MAX_LEN + 1];
 
   for (i = task->from; i < task->to; ++i)
     new_text[i] = 0;

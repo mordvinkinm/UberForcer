@@ -57,18 +57,4 @@ void multi_brute(config_t *config, task_t *initial_task);
  *************************************************************************/
 void generate_tasks(config_t *config, task_t *initial_task);
 
-/**************************************************************************
- * Function:    bruteforce_task_job
- *
- * Description: One-thread job, that extracts tasks from the queue and
- *              bruteforces this task.
- *
- * Inputs:      void* arg [actual type is worker_args_t*]
- *              parameters passed to a thread worker
- *
- * Returns:     void*
- *
- *************************************************************************/
-void* bruteforce_task_job(void *arg);
-
 #endif /* WORKERS_H */

@@ -131,7 +131,6 @@ static const char e2[] =
 };
 
 /**************************************************************************
-* Function:    setkey
 *
 * Description: Set up the key schedule from the encryption key.
 *
@@ -139,7 +138,6 @@ static const char e2[] =
 *              Pointer to 64 character array.  Each character represents a
 *              bit in the key.
 *
-* Returns:     none
 **************************************************************************/
 void setkey(char *key)
 {
@@ -191,7 +189,6 @@ void setkey(char *key)
 }
 
 /**************************************************************************
-* Function:    setkey_r
 *
 * Description: Set up the key schedule from the encryption key.
 *              Thread-safe version of setkey function.
@@ -207,7 +204,6 @@ void setkey(char *key)
 *              char (*KS)[16][48]
 *              Key schedule array
 *
-* Returns:     none
 **************************************************************************/
 void setkey_r(char *key, char (*C)[28], char (*D)[28], char (*E)[48], char (*KS)[16][48])
 {
@@ -341,7 +337,6 @@ static const char P[] =
 static char preS[48];
 
 /**************************************************************************
-* Function:    encrypt
 *
 * Description: Uses DES to encrypt a 64 bit block of data.  Requires
 *              setkey to be invoked with the encryption key before it may
@@ -351,7 +346,6 @@ static char preS[48];
 *              Pointer to 64 character array.  Each character represents a
 *              bit in the data block.
 *
-* Returns:     none
 **************************************************************************/
 void encrypt(char *block)
 {
@@ -440,7 +434,6 @@ void encrypt(char *block)
 }
 
 /**************************************************************************
-* Function:    encrypt_r
 *
 * Description: Uses DES to encrypt a 64 bit block of data.  Requires
 *              setkey to be invoked with the encryption key before it may
@@ -458,7 +451,6 @@ void encrypt(char *block)
 *              char (*KS)[16][48]
 *              Key schedule array
 *
-* Returns:     none
 **************************************************************************/
 void encrypt_r(char *block, char (*E)[48], char (*KS)[16][48])
 {
@@ -548,7 +540,6 @@ void encrypt_r(char *block, char (*E)[48], char (*KS)[16][48])
 }
 
 /**************************************************************************
-* Function:    crypt
 *
 * Description: Clone of Unix crypt(3) function.
 *
@@ -646,7 +637,6 @@ char *crypt(char *pw, char *salt)
 }
 
 /**************************************************************************
-* Function:    crypt_r
 *
 * Description: Clone of Unix crypt(3) function.
 *              thread-safe version of crypt function
