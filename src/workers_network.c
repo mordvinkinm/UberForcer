@@ -34,6 +34,17 @@ void re_add_task(config_t* config, task_t* task) {
   trace("Task added to the queue: [from: %d, to: %d, password: %s]\n", task->from, task->to, task->password);
 }
 
+/**************************************************************************
+ * Function:    server_task_manager_job 
+ *
+ * Description: Function that handles communication between server and 
+ *              one particular client
+ *
+ * Inputs:      worker_args_t *raw_args
+ *              pointer to thread arguments, which encapsulates pointer
+ *              to application configuration and client connection socket
+ *
+ *************************************************************************/
 void* server_task_manager_job(void* raw_args) {
   client_listener_args_t* args = raw_args;
 
@@ -90,6 +101,18 @@ void* server_task_manager_job(void* raw_args) {
   }
 }
 
+/**************************************************************************
+ * Function:    server_listener_thread_job 
+ *
+ * Description: Main function for server listener - initializes network,
+ *              handles and accepts newly connected clients, starts
+ *              separate threads to send tasks to clients.
+ *
+ * Inputs:      worker_args_t *raw_args
+ *              pointer to thread arguments, which encapsulates pointer
+ *              to application configuration and socket_id
+ *
+ *************************************************************************/
 void* server_listener_thread_job(void* raw_args) {
   worker_args_t* args = raw_args;
   config_t* config = args->config;
