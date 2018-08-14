@@ -64,7 +64,6 @@ void generate_server_tasks(config_t * config) {
 }
 
 /**************************************************************************
-* Function:    help_routine
 *
 * Description: One of available application modes - show help message
 *
@@ -87,7 +86,6 @@ void help_routine() {
 }
 
 /**************************************************************************
-* Function:    encrypt_routine
 *
 * Description: One of available application modes - encrypts a password
 *              using provided salt
@@ -171,7 +169,6 @@ void client_routine(config_t *config) {
 }
 
 /**************************************************************************
-* Function:    main
 *
 * Description: entry point of application, which calls function to
 *              parse arguments and invokes appropriate routine function

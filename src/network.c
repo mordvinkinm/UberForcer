@@ -6,7 +6,6 @@
 #include "protocol.h"
 
 /**************************************************************************
- * Function:    init_network
  *
  * Description: Initializes network operation, making appropriate calls:
  *
@@ -28,7 +27,6 @@ void init_network() {
 }
 
 /**************************************************************************
- * Function:    init_server_listener
  *
  * Description: Initializes network part of bruteforcing server, listening
  *              for incoming connection
@@ -63,7 +61,6 @@ int init_server_listener(config_t *config) {
 }
 
 /**************************************************************************
- * Function:    accept_client_connection
  *
  * Description: accepts client connection to the bruteforcing server
  *
@@ -87,7 +84,6 @@ int accept_client_connection(int sock) {
 }
 
 /**************************************************************************
- * Function:    connect_to_server
  *
  * Description: Connects client to a bruteforcing server.
  *
@@ -126,7 +122,6 @@ int connect_to_server(char *host, unsigned short port, struct sockaddr_in *serv_
 }
 
 /**************************************************************************
- * Function:    send_task
  *
  * Description: sends bruteforcing task to a client over network.
  *              Operation performed in three stages:
@@ -174,7 +169,6 @@ int send_task(int sock, config_t *config, task_t *task) {
 }
 
 /**************************************************************************
- * Function:    read_task
  *
  * Description: receives bruteforcing task from a server over network.
  *              Operation performed in three stages:
@@ -228,7 +222,6 @@ int read_task(int sock, config_t *config, task_t *task) {
 }
 
 /**************************************************************************
- * Function:    send_result
  *
  * Description: sends bruteforcing task result over network back to server.
  *              Operation performed in three stages:
@@ -274,7 +267,6 @@ int send_result(int sock, result_t *result) {
 }
 
 /**************************************************************************
- * Function:    read_result
  *
  * Description: reads bruteforcing task that was sent to server over network.
  *              Opertion performed in three phases:

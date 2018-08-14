@@ -29,7 +29,6 @@
 #include "config.h"
 
 /**************************************************************************
- * Function:    validate_integer
  *
  * Description: Specific validator to ensure that provided char array
  *              can be parsed as integer and between minValue and maxValue
@@ -65,7 +64,6 @@ bool validate_integer(char *s, int minValue, int maxValue) {
 }
 
 /**************************************************************************
- * Function:    parse_run_params
  *
  * Description: Parses optional arguments to run the app:
  *               - Number of threads
@@ -145,7 +143,6 @@ int parse_run_params(int start_arg_ind, int end_arg_ind, char *argv[], config_t 
 }
 
 /**************************************************************************
- * Function:    parse_args
  *
  * Description: Parses command line arguments to run program:
  *              run mode (help, crypt, decrypt, ...)

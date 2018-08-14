@@ -18,7 +18,6 @@
 #include "config.h"
 
 /**************************************************************************
- * Function:    bruteforce_rec
  *
  * Description: Performs recursive bruteforce
  *
@@ -62,7 +61,6 @@ void bruteforce_rec(task_t* task, config_t* config, void (*check_handler)(config
 }
 
 /**************************************************************************
- * Function:    bruteforce_iter
  *
  * Description: Performs iterative bruteforce
  *

@@ -20,7 +20,6 @@
 #include "config.h"
 
 /**************************************************************************
- * Function:    check_task
  *
  * Description: Thread-unsafe version of hash checker.
  *              Calls "crypt" function and checks if result equals to target
@@ -44,7 +43,6 @@ void check_task(config_t* config, task_t* task) {
 }
 
 /**************************************************************************
- * Function:    check_task_benchmark
  *
  * Description: Thread-unsafe function to calculate bruteforcing performance.
  *              Calls "crypt" function, but ignores result of "crypt" call.
@@ -66,7 +64,6 @@ void check_task_benchmark(config_t* config, task_t* task) {
 }
 
 /**************************************************************************
- * Function:    check_task_r
  *
  * Description: Reentrant version of hash checker.
  *              Under the hood, calls crypt_r and checks result against
@@ -93,7 +90,6 @@ void check_task_r(config_t* config, task_t* task) {
 }
 
 /**************************************************************************
- * Function:    check_task_benchmark_r
  *
  * Description: Reentrant function to calculate bruteforcing performance.
  *              Calls "crypt_r", but ignores the result (thus bruteforce

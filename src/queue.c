@@ -20,7 +20,6 @@
 #include "queue.h"
 
 /**************************************************************************
- * Function:    queue_init
  *
  * Description: initializes queue, setting mutexes, semaphores and head/tail
  *
@@ -40,7 +39,6 @@ void queue_init(queue_t* q) {
 }
 
 /**************************************************************************
- * Function:    queue_push
  *
  * Description: adds element to the end of queue
  *              if queue is full, wait on semaphore until at least one
@@ -67,7 +65,6 @@ void queue_push(queue_t* q, task_t* task) {
 }
 
 /**************************************************************************
- * Function:    queue_pop
  *
  * Description: removes first element from the queue.
  *              If there are no elements in the queue, wait until at least

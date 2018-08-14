@@ -11,7 +11,6 @@
 #include "workers_network.h"
 
 /**************************************************************************
- * Function:    re_add_task
  *
  * Description: Re-adds task back to the queue if network communication
  *              between server and client failed for some reason
@@ -35,7 +34,6 @@ void re_add_task(config_t* config, task_t* task) {
 }
 
 /**************************************************************************
- * Function:    server_task_manager_job 
  *
  * Description: Function that handles communication between server and 
  *              one particular client
@@ -102,7 +100,6 @@ void* server_task_manager_job(void* raw_args) {
 }
 
 /**************************************************************************
- * Function:    server_listener_thread_job 
  *
  * Description: Main function for server listener - initializes network,
  *              handles and accepts newly connected clients, starts
@@ -148,7 +145,6 @@ void* server_listener_thread_job(void* raw_args) {
 }
 
 /**************************************************************************
- * Function:    server_listener
  *
  * Description: Wrapper that starts a new thread to host server listener
  *
@@ -169,7 +165,6 @@ void server_listener(config_t* config) {
 }
 
 /**************************************************************************
- * Function:    client_job
  *
  * Description: client worker implementation, which contains of following steps:
  *              - connects to server

@@ -131,7 +131,6 @@ static const char e2[] =
 };
 
 /**************************************************************************
-* Function:    setkey
 *
 * Description: Set up the key schedule from the encryption key.
 *
@@ -190,7 +189,6 @@ void setkey(char *key)
 }
 
 /**************************************************************************
-* Function:    setkey_r
 *
 * Description: Set up the key schedule from the encryption key.
 *              Thread-safe version of setkey function.
@@ -339,7 +337,6 @@ static const char P[] =
 static char preS[48];
 
 /**************************************************************************
-* Function:    encrypt
 *
 * Description: Uses DES to encrypt a 64 bit block of data.  Requires
 *              setkey to be invoked with the encryption key before it may
@@ -437,7 +434,6 @@ void encrypt(char *block)
 }
 
 /**************************************************************************
-* Function:    encrypt_r
 *
 * Description: Uses DES to encrypt a 64 bit block of data.  Requires
 *              setkey to be invoked with the encryption key before it may
@@ -544,7 +540,6 @@ void encrypt_r(char *block, char (*E)[48], char (*KS)[16][48])
 }
 
 /**************************************************************************
-* Function:    crypt
 *
 * Description: Clone of Unix crypt(3) function.
 *
@@ -642,7 +637,6 @@ char *crypt(char *pw, char *salt)
 }
 
 /**************************************************************************
-* Function:    crypt_r
 *
 * Description: Clone of Unix crypt(3) function.
 *              thread-safe version of crypt function

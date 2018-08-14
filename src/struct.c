@@ -3,7 +3,6 @@
 #include "struct.h"
 
 /**************************************************************************
- * Function:    init_task
  *
  * Description: Initializes task, setting its byte data to zeroes
  *
@@ -19,7 +18,6 @@ void init_task(task_t *task) {
 }
 
 /**************************************************************************
- * Function:    bruteforce_rec
  *
  * Description: Initializes result, setting ts byte data to zeroes
  *

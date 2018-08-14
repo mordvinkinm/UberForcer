@@ -7,7 +7,6 @@
 #include "workers.h"
 
 /**************************************************************************
- * Function:    add_to_queue
  *
  * Description: adds a task to the queue
  *
@@ -28,7 +27,6 @@ void add_to_queue(config_t* config, task_t* task) {
 }
 
 /**************************************************************************
- * Function:    bruteforce_task_job
  *
  * Description: Job for one thread, that extracts tasks from the queue and
  *              bruteforces this task.
@@ -73,7 +71,6 @@ void* bruteforce_task_job(void* arg) {
 }
 
 /**************************************************************************
- * Function:    generate_tasks
  *
  * Description: function that generates thread tasks based on provided
  *              base task
@@ -105,7 +102,6 @@ void generate_tasks(config_t* config, task_t* initial_task) {
 }
 
 /**************************************************************************
- * Function:    single_brute
  *
  * Description: highlevel worker that bruteforces provided task in a
  *              single-threaded mode
@@ -124,7 +120,6 @@ void single_brute(config_t* config, task_t* initial_task) {
 }
 
 /**************************************************************************
- * Function:    multi_brute
  *
  * Description: highlevel worker that bruteforces provided task in a
  *              multi-threaded mode.
