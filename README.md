@@ -6,7 +6,7 @@ Attempt to write a super-efficient bruteforcing tool for learning purposes on pu
 
 1. [Done] Single-threading task
 2. [Done] Multi-threading task
-3. Client-server task, i.e. master & workers
+3. [Done] Client-server task, i.e. master & workers
 
 # How to build
 ## Windows (using mingw make)
