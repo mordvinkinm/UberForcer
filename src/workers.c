@@ -18,6 +18,9 @@
  *
  *************************************************************************/
 void add_to_queue(config_t* config, task_t* task) {
+  if (config->result.found == true)
+    return;
+
   pthread_mutex_lock(&config->num_tasks_mutex);
   ++config->num_tasks;
   pthread_mutex_unlock(&config->num_tasks_mutex);

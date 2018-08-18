@@ -25,6 +25,9 @@
  *
  *************************************************************************/
 void re_add_task(config_t* config, task_t* task) {
+  if (config->result.found == true)
+    return;
+  
   pthread_mutex_lock(&config->num_tasks_mutex);
   ++config->num_tasks;
   pthread_mutex_unlock(&config->num_tasks_mutex);
@@ -82,12 +85,8 @@ void* server_task_manager_job(void* raw_args) {
     }
 
     if (result.found == true) {
-      printf("Result found: %s\n", result.password);
-
       strcpy(config->result.password, result.password);
       config->result.found = result.found;
-
-      pthread_exit(NULL);
     }
 
     pthread_mutex_lock(&config->num_tasks_mutex);
