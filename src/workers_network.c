@@ -17,7 +17,7 @@
  *
  * Inputs:      config_t *config
  *              pointer to application config
- * 
+ *
  *              task_t *task
  *              pointer to task that will be added back to queue
  *
@@ -25,6 +25,9 @@
  *
  *************************************************************************/
 void re_add_task(config_t* config, task_t* task) {
+  if (config->result.found == true)
+    return;
+
   pthread_mutex_lock(&config->num_tasks_mutex);
   ++config->num_tasks;
   pthread_mutex_unlock(&config->num_tasks_mutex);
@@ -35,7 +38,7 @@ void re_add_task(config_t* config, task_t* task) {
 
 /**************************************************************************
  *
- * Description: Function that handles communication between server and 
+ * Description: Function that handles communication between server and
  *              one particular client
  *
  * Inputs:      worker_args_t *raw_args
@@ -82,12 +85,8 @@ void* server_task_manager_job(void* raw_args) {
     }
 
     if (result.found == true) {
-      printf("Result found: %s\n", result.password);
-
       strcpy(config->result.password, result.password);
       config->result.found = result.found;
-
-      pthread_exit(NULL);
     }
 
     pthread_mutex_lock(&config->num_tasks_mutex);
@@ -182,6 +181,8 @@ void server_listener(config_t* config) {
  *
  *************************************************************************/
 int client_job(config_t* config) {
+  const int MAX_FAILURE_COUNT = 3;
+
   struct sockaddr_in serv_addr;
 
   int sock = connect_to_server(config->host, config->port, &serv_addr);
@@ -192,8 +193,22 @@ int client_job(config_t* config) {
   for (;;) {
     task_t task;
     init_task(&task);
+    
+    bool network_call_success = false;
+    int failure_cnt = 0;
 
-    read_task(sock, config, &task);
+    while (network_call_success == false) {
+      if (EXIT_SUCCESS != read_task(sock, config, &task)) {
+        ++failure_cnt;
+
+        if (failure_cnt == MAX_FAILURE_COUNT) {
+          printf("Exceeded maximum amount of network errors. Shutting down...\n");
+          return EXIT_FAILURE;
+        }
+      } else {
+        network_call_success = true;
+      }
+    }
 
     if (config->num_threads > 1) {
       multi_brute(config, &task);
@@ -201,7 +216,21 @@ int client_job(config_t* config) {
       single_brute(config, &task);
     }
 
-    send_result(sock, &config->result);
+    network_call_success = false;
+    failure_cnt = 0;
+
+    while (network_call_success == false) {
+      if (EXIT_SUCCESS != send_result(sock, &config->result)) {
+        ++failure_cnt;
+
+        if (failure_cnt == MAX_FAILURE_COUNT) {
+          printf("Exceeded maximum amount of network errors. Shutting down...\n");
+          return EXIT_FAILURE;
+        }
+      } else {
+        network_call_success = true;
+      }
+    }
   }
 
   return EXIT_SUCCESS;
