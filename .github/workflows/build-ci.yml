@@ -1,0 +1,20 @@
+name: Continuous Integration (Windows)
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Install MinGW
+      uses: egor-tensin/setup-mingw@v2
+      with:
+        platform: x86
+      
+    - name: make
+      run: mingw32-make uberforcer_windows
