@@ -1,7 +1,9 @@
-name: Continuous Integration (Windows)
+name: Build
 
 on:
   pull_request:
+    branches: [ master ]
+  push:
     branches: [ master ]
 
 jobs:
@@ -15,6 +17,15 @@ jobs:
       uses: egor-tensin/setup-mingw@v2
       with:
         platform: x86
+        
+    - name: Create "out" directory
+      run: mkdir out
       
     - name: make
       run: mingw32-make uberforcer_windows
+      
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: Uberforcer_x86
+        path: out
