@@ -13,10 +13,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
-    - name: Install MinGW
-      uses: egor-tensin/setup-mingw@v2
+    - uses: msys2/setup-msys2@v2
       with:
-        platform: x86
+        msystem: MINGW32
         
     - name: Create "out" directory
       run: mkdir out
@@ -28,4 +27,4 @@ jobs:
       uses: actions/upload-artifact@v1.0.0
       with:
         name: Uberforcer_x86
-        path: out
+        path: out\uberforcer.exe
